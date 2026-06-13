@@ -25,6 +25,8 @@
 - `internal/server/` — HTTP REST API
 - `internal/secrets/` — Infisical / env secret loading
 - `internal/config/` — Viper-based configuration
+- `internal/experiment/` — fixed-budget autonomous research loop runner
+- `internal/alchemist/` — Karpathy-style autonomous optimization daemon
 
 ## Build & Test
 
@@ -72,5 +74,6 @@ The project was bootstrapped from the issues at https://github.com/OpenSIN-Code/
 - Issue #1: Unified Intelligence Gateway plan
 - Issue #2: Video intelligence integration
 - Issue #3: Deprecation strategy + multi-agent research patterns
+- Issue #4: Alchemist Daemon (Karpathy-style autoresearch)
 
 All code in this repo is built from those issues and comments.
