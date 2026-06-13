@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-06-14
+
+### Fixed
+
+- CI build failed because the `cmd/sin-websearch/` directory was ignored by `.gitignore` (pattern `sin-websearch` matched any directory with that name). Changed to `/sin-websearch` to only ignore the root binary.
+- `internal/secrets/` was ignored by the global `.gitignore_global` `secrets/` pattern. Force-added `infisical.go` and its CoDocs companion.
+- Resolved all `golangci-lint` `errcheck` findings across the codebase:
+  - `internal/engines/video.go` — `os.MkdirAll` errors
+  - `internal/engines/whisper.go` — `writer.WriteField` errors
+  - `internal/imaging/resize.go` — `os.MkdirAll` error
+  - `internal/briefing/video_html.go` — `os.MkdirAll` error
+  - `internal/alchemist/daemon.go` — `git.ReturnToMainBranch` and `git.Restore` errors
+  - `internal/server/http.go` — `json.Encoder.Encode` error
+  - `cmd/sin-websearch/watch_cmd.go` — `engine.Cleanup` error
+- Removed unused `sync.Mutex` from `internal/alchemist/daemon.go`.
+- Removed unused `redact()` helper from `internal/server/http.go`.
+
+### Changed
+
+- `internal/experiment/loop_test.go` — removed ineffectual `reason` assignments.
+
 ## [0.2.0] - 2026-06-14
 
 ### Added
@@ -63,5 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Infisical / environment secret loading.
 - Cobra CLI and Viper configuration.
 
+[0.2.1]: https://github.com/OpenSIN-Code/web_search_bundle/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/OpenSIN-Code/web_search_bundle/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OpenSIN-Code/web_search_bundle/releases/tag/v0.1.0
