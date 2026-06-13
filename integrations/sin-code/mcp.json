@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "sin-websearch": {
+      "command": "sin-websearch",
+      "args": ["serve"],
+      "description": "Unified Intelligence Gateway"
+    }
+  }
+}

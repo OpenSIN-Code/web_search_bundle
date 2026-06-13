@@ -1,0 +1,17 @@
+# sin-websearch example configuration
+# Place at ~/.config/sin-websearch/sin-websearch.yaml
+
+serpapi_keys:
+  - "${SERPAPI_KEY_1}"
+  - "${SERPAPI_KEY_2}"
+brave_api_key: "${BRAVE_API_KEY}"
+openrouter_api_key: "${OPENROUTER_API_KEY}"
+scrapecreators_api_key: "${SCRAPECREATORS_API_KEY}"
+groq_api_key: "${GROQ_API_KEY}"
+openai_api_key: "${OPENAI_API_KEY}"
+
+cache_path: "~/.local/share/sin-websearch/sin-websearch.db"
+http_port: 8787
+mcp_port: 8788
+searxng_urls:
+  - "http://localhost:8080"
