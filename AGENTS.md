@@ -27,6 +27,8 @@
 - `internal/config/` — Viper-based configuration
 - `internal/experiment/` — fixed-budget autonomous research loop runner
 - `internal/alchemist/` — Karpathy-style autonomous optimization daemon
+- `internal/alchemist/swarm.go` — multi-strategy parallel alchemist runs
+- `internal/alchemist/literature.go` — sin-websearch hypothesis refresh
 
 ## Build & Test
 
@@ -75,5 +77,6 @@ The project was bootstrapped from the issues at https://github.com/OpenSIN-Code/
 - Issue #2: Video intelligence integration
 - Issue #3: Deprecation strategy + multi-agent research patterns
 - Issue #4: Alchemist Daemon (Karpathy-style autoresearch)
+- Issue #5: Swarm-Alchemist + Literature-Loader
 
 All code in this repo is built from those issues and comments.

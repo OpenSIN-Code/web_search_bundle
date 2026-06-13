@@ -43,6 +43,10 @@ type Config struct {
 	WorkBranch     string // default: "alchemist/<timestamp>"
 	HooksEnabled   bool
 	Logger         *slog.Logger
+
+	// Literature-driven hypothesis refresh.
+	LiteratureRefreshEvery int    // 0 = disabled, default 10
+	LiteratureProfile      string // research profile (default: technical-deep-dive)
 }
 
 // ExperimentRecord is a single logged experiment
@@ -65,6 +69,7 @@ type Daemon struct {
 	history         *History
 	git             *GitOps
 	program         *ProgramMD
+	literature      *LiteratureLoader
 	baseline        float64
 	mu              sync.Mutex
 	experimentCount int
@@ -86,6 +91,9 @@ func NewDaemon(cfg Config) (*Daemon, error) {
 	if cfg.Safety == "" {
 		cfg.Safety = SafetyAutoCommit
 	}
+	if cfg.LiteratureProfile == "" {
+		cfg.LiteratureProfile = "technical-deep-dive"
+	}
 
 	hist, err := NewHistory(cfg.RepoPath)
 	if err != nil {
@@ -102,13 +110,18 @@ func NewDaemon(cfg Config) (*Daemon, error) {
 		return nil, fmt.Errorf("load program.md: %w", err)
 	}
 
+	loader := NewLiteratureLoader(cfg.RepoPath)
+	loader.SetProfile(cfg.LiteratureProfile)
+	loader.SetRefreshEvery(cfg.LiteratureRefreshEvery)
+
 	return &Daemon{
-		cfg:       cfg,
-		history:   hist,
-		git:       git,
-		program:   prog,
-		startTime: time.Now(),
-		logger:    cfg.Logger,
+		cfg:        cfg,
+		history:    hist,
+		git:        git,
+		program:    prog,
+		literature: loader,
+		startTime:  time.Now(),
+		logger:     cfg.Logger,
 	}, nil
 }
 
@@ -249,6 +262,26 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 		// Update program.md learnings
 		d.program.AppendLearning(fmt.Sprintf("Run %d [%s]: %s → %s",
 			d.experimentCount, decision, hypothesis, reason))
+
+		// Periodic literature refresh
+		if d.literature != nil && d.literature.ShouldRefresh(d.experimentCount) {
+			d.logger.Info("triggering literature refresh",
+				"experiment_count", d.experimentCount)
+			litCtx, litCancel := context.WithTimeout(ctx, 5*time.Minute)
+			result, err := d.literature.Refresh(litCtx, d.cfg.TargetFile+" optimization")
+			litCancel()
+			if err != nil {
+				d.logger.Warn("literature refresh failed", "err", err)
+			} else if result != nil {
+				if err := d.literature.InjectIntoProgramMD(d.program, result); err != nil {
+					d.logger.Warn("inject hypotheses failed", "err", err)
+				} else {
+					d.logger.Info("literature refresh injected",
+						"new_hypotheses", len(result.NewHypotheses),
+						"verified_claims", len(result.VerifiedClaims))
+				}
+			}
+		}
 
 		// Hook: VerifyPass / VerifyFail
 		if d.cfg.HooksEnabled {
