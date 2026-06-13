@@ -82,7 +82,9 @@ func GenerateVideoBriefHTML(opts VideoBriefOptions) (string, error) {
 		}
 		home, _ := os.UserHomeDir()
 		dir := filepath.Join(home, "Documents", "SIN-Briefings")
-		os.MkdirAll(dir, 0755)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return "", fmt.Errorf("briefings dir: %w", err)
+		}
 		opts.OutputPath = filepath.Join(dir, fmt.Sprintf("%s-%s.html", slug, time.Now().Format("2006-01-02-1504")))
 	}
 

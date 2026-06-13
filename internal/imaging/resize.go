@@ -67,7 +67,9 @@ func ResizeImage(inputPath, outputPath string, opts ResizeOptions) error {
 
 // ResizeBatch resizes a batch of images into a directory.
 func ResizeBatch(inputPaths []string, outputDir string, opts ResizeOptions) ([]string, error) {
-	os.MkdirAll(outputDir, 0755)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return nil, fmt.Errorf("create output dir: %w", err)
+	}
 	var outputs []string
 	for _, path := range inputPaths {
 		name := filepath.Base(path)

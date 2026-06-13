@@ -56,7 +56,11 @@ func newWatchCmd() *cobra.Command {
 				return fmt.Errorf("watch failed: %w", err)
 			}
 			if cleanup {
-				defer engine.Cleanup(analysis)
+				defer func() {
+					if err := engine.Cleanup(analysis); err != nil {
+						fmt.Fprintf(os.Stderr, "cleanup: %v\n", err)
+					}
+				}()
 			}
 			if jsonOutput {
 				enc := json.NewEncoder(os.Stdout)
