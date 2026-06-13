@@ -6,8 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/OpenSIN-Code/web_search_bundle/internal/alchemist"
 	"github.com/OpenSIN-Code/web_search_bundle/internal/briefing"
 	"github.com/OpenSIN-Code/web_search_bundle/internal/engines"
 	"github.com/OpenSIN-Code/web_search_bundle/internal/orchestrator"
@@ -114,6 +117,30 @@ func (s *Server) setup() {
 		},
 	}
 	s.server.AddTool(videoPromptTool, s.handleVideoPrompt)
+
+	alchemistTool := mcp.Tool{
+		Name:        "websearch_alchemist",
+		Description: "Run a Karpathy-style autonomous alchemist research loop or a multi-strategy swarm in a local git repo. Defaults to headless (no git mutations) for safety.",
+		InputSchema: mcp.ToolInputSchema{
+			Type: "object",
+			Properties: map[string]interface{}{
+				"repo_path":        map[string]string{"type": "string", "description": "Path to git repo (default: current working directory)"},
+				"run_cmd":          map[string]string{"type": "string", "description": "Shell command that prints the metric to stdout (M3 verification gate)"},
+				"target":           map[string]string{"type": "string", "description": "File the agent mutates (default: train.py)"},
+				"metric":           map[string]string{"type": "string", "description": "Metric name (default: metric)"},
+				"regex":            map[string]string{"type": "string", "description": "Regex with one capture group to extract metric (default: metric:\\s*([0-9\\.]+))"},
+				"higher_is_better": map[string]string{"type": "boolean", "description": "Optimization direction (default: false)"},
+				"max_experiments":  map[string]string{"type": "integer", "description": "Maximum experiments (default: 3)"},
+				"budget":           map[string]string{"type": "string", "description": "Per-experiment time budget (default: 30s)"},
+				"runtime":          map[string]string{"type": "string", "description": "Total loop runtime cap (default: 5m)"},
+				"program":          map[string]string{"type": "string", "description": "Path to program.md (default: program.md)"},
+				"safety":           map[string]string{"type": "string", "description": "headless|auto-commit|interactive (default: headless)"},
+				"strategies":       map[string]string{"type": "string", "description": "Comma-separated strategy names for swarm mode. If empty, runs a single daemon."},
+			},
+			Required: []string{"run_cmd"},
+		},
+	}
+	s.server.AddTool(alchemistTool, s.handleAlchemist)
 }
 
 // Serve starts the stdio MCP server.
@@ -128,6 +155,32 @@ func argString(req mcp.CallToolRequest, key string) string {
 	}
 	val, _ := args[key].(string)
 	return val
+}
+
+func argBool(req mcp.CallToolRequest, key string) bool {
+	args, ok := req.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return false
+	}
+	val, _ := args[key].(bool)
+	return val
+}
+
+func argInt(req mcp.CallToolRequest, key string, defaultVal int) int {
+	args, ok := req.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return defaultVal
+	}
+	switch v := args[key].(type) {
+	case int:
+		return v
+	case float64:
+		return int(v)
+	case int64:
+		return int(v)
+	default:
+		return defaultVal
+	}
 }
 
 func (s *Server) handleSearch(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -255,4 +308,126 @@ func (s *Server) handleVideoPrompt(ctx context.Context, req mcp.CallToolRequest)
 
 func formatDuration(d interface{}) string {
 	return fmt.Sprintf("%v", d)
+}
+
+func (s *Server) handleAlchemist(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	runCmd := argString(req, "run_cmd")
+	if runCmd == "" {
+		return mcp.NewToolResultError("run_cmd required (M3 verification gate)"), nil
+	}
+
+	repoPath := argString(req, "repo_path")
+	if repoPath == "" {
+		var err error
+		repoPath, err = os.Getwd()
+		if err != nil {
+			return mcp.NewToolResultError("repo path: " + err.Error()), nil
+		}
+	}
+
+	metric := argString(req, "metric")
+	if metric == "" {
+		metric = "metric"
+	}
+	regex := argString(req, "regex")
+	if regex == "" {
+		regex = `metric:\s*([0-9\.]+)`
+	}
+	program := argString(req, "program")
+	if program == "" {
+		program = "program.md"
+	}
+	target := argString(req, "target")
+	if target == "" {
+		target = "train.py"
+	}
+
+	budget := argString(req, "budget")
+	if budget == "" {
+		budget = "30s"
+	}
+	budgetDur, err := time.ParseDuration(budget)
+	if err != nil {
+		return mcp.NewToolResultError("invalid budget: " + err.Error()), nil
+	}
+
+	runtime := argString(req, "runtime")
+	if runtime == "" {
+		runtime = "5m"
+	}
+	runtimeDur, err := time.ParseDuration(runtime)
+	if err != nil {
+		return mcp.NewToolResultError("invalid runtime: " + err.Error()), nil
+	}
+
+	safety := alchemist.SafetyMode(argString(req, "safety"))
+	if safety == "" {
+		safety = alchemist.SafetyHeadless
+	}
+	if safety != alchemist.SafetyHeadless && safety != alchemist.SafetyAutoCommit && safety != alchemist.SafetyInteractive {
+		return mcp.NewToolResultError("invalid safety mode: " + string(safety)), nil
+	}
+
+	maxExperiments := argInt(req, "max_experiments", 3)
+
+	cfg := alchemist.Config{
+		RepoPath:       repoPath,
+		ProgramFile:    program,
+		TargetFile:     target,
+		MetricName:     metric,
+		MetricRegex:    regex,
+		HigherIsBetter: argBool(req, "higher_is_better"),
+		Budget:         budgetDur,
+		RunCmd:         []string{"sh", "-c", runCmd},
+		MaxExperiments: maxExperiments,
+		MaxRuntime:     runtimeDur,
+		Safety:         safety,
+	}
+
+	strategies := argString(req, "strategies")
+	if strategies != "" {
+		// Swarm mode.
+		var names []string
+		for _, n := range strings.Split(strategies, ",") {
+			n = strings.TrimSpace(n)
+			if n != "" {
+				names = append(names, n)
+			}
+		}
+		swarmCfg := alchemist.SwarmConfig{
+			BaseConfig: cfg,
+			Strategies: names,
+			MaxWorkers: 0,
+			FirstWin:   false,
+			SharedDB:   true,
+		}
+		swarm, err := alchemist.NewSwarm(swarmCfg)
+		if err != nil {
+			return mcp.NewToolResultError("init swarm: " + err.Error()), nil
+		}
+		defer swarm.Close()
+
+		report, err := swarm.Run(ctx)
+		if err != nil {
+			return mcp.NewToolResultError("swarm run: " + err.Error()), nil
+		}
+		return mcp.NewToolResultText(report.RenderMarkdown()), nil
+	}
+
+	// Single daemon mode.
+	daemon, err := alchemist.NewDaemon(cfg)
+	if err != nil {
+		return mcp.NewToolResultError("init daemon: " + err.Error()), nil
+	}
+	defer daemon.Close()
+
+	report, err := daemon.Run(ctx)
+	if err != nil {
+		return mcp.NewToolResultError("daemon run: " + err.Error()), nil
+	}
+	md, err := report.RenderMarkdown()
+	if err != nil {
+		return mcp.NewToolResultError("render report: " + err.Error()), nil
+	}
+	return mcp.NewToolResultText(md), nil
 }

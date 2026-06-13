@@ -54,6 +54,7 @@ go test ./...
 - `websearch_watch` — video analysis
 - `websearch_video_brief` — HTML briefing
 - `websearch_video_prompt` — Vision-LLM prompt
+- `websearch_alchemist` — autonomous research loop / swarm
 
 ## HTTP Endpoints
 

@@ -45,15 +45,17 @@ func (p *ProgramMD) parse() {
 		trimmed := strings.TrimSpace(line)
 
 		// Detect sections
-		lower := strings.ToLower(trimmed)
 		switch {
-		case strings.Contains(lower, "hypothesis") && strings.Contains(lower, "queue"):
-			section = "hypotheses"
-			continue
-		case strings.Contains(lower, "learning"):
-			section = "learnings"
-			continue
 		case strings.HasPrefix(trimmed, "#"):
+			lower := strings.ToLower(trimmed)
+			if strings.Contains(lower, "hypothesis") && strings.Contains(lower, "queue") {
+				section = "hypotheses"
+				continue
+			}
+			if strings.Contains(lower, "learning") {
+				section = "learnings"
+				continue
+			}
 			section = ""
 			continue
 		}
@@ -92,8 +94,8 @@ func (p *ProgramMD) NextHypothesis() string {
 	h := p.hypotheses[0]
 	p.hypotheses = p.hypotheses[1:]
 
-	// Mark as in-progress in the file (non-blocking)
-	go p.markHypothesisInProgress(h)
+	// Mark as in-progress in the file.
+	p.markHypothesisInProgress(h)
 
 	return h
 }
@@ -137,45 +139,64 @@ func (p *ProgramMD) AddHypothesis(h string) {
 	_ = p.flush()
 }
 
-// flush writes the updated program.md to disk
+// flush writes the updated program.md to disk.
+// It preserves the original structure and replaces the hypothesis + learning bullets.
 func (p *ProgramMD) flush() error {
-	// Build updated content: preserve everything, update learnings section
 	lines := strings.Split(p.rawContent, "\n")
 	var out []string
 
 	inLearnings := false
+	inHypotheses := false
 	learningsWritten := false
+	hypothesesWritten := false
 
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
-		lower := strings.ToLower(trimmed)
 
-		// Detect learnings section start
-		if strings.Contains(lower, "learning") && strings.HasPrefix(trimmed, "#") {
-			inLearnings = true
-			out = append(out, line)
-			// Write existing learnings right after the header
-			for _, l := range p.learnings {
-				out = append(out, "- "+l)
+		// Detect headings
+		if strings.HasPrefix(trimmed, "#") {
+			inLearnings = false
+			inHypotheses = false
+
+			lower := strings.ToLower(trimmed)
+			if strings.Contains(lower, "hypothesis") && strings.Contains(lower, "queue") {
+				inHypotheses = true
+				hypothesesWritten = true
+				out = append(out, line)
+				for _, h := range p.hypotheses {
+					out = append(out, "- [ ] "+h)
+				}
+				continue
 			}
-			learningsWritten = true
+			if strings.Contains(lower, "learning") {
+				inLearnings = true
+				learningsWritten = true
+				out = append(out, line)
+				for _, l := range p.learnings {
+					out = append(out, "- "+l)
+				}
+				continue
+			}
+			out = append(out, line)
 			continue
 		}
 
-		// Detect next section (end of learnings)
-		if inLearnings && strings.HasPrefix(trimmed, "#") {
-			inLearnings = false
-		}
-
-		// Skip old learning bullets (we rewrote them)
-		if inLearnings && strings.HasPrefix(trimmed, "-") {
+		// Skip old bullets in managed sections; we rewrote them above.
+		if (inHypotheses && strings.HasPrefix(trimmed, "-")) ||
+			(inLearnings && strings.HasPrefix(trimmed, "-")) {
 			continue
 		}
 
 		out = append(out, line)
 	}
 
-	// If no learnings section found, append one
+	// If no managed sections were found, append them.
+	if !hypothesesWritten {
+		out = append(out, "", "## Hypothesis Queue", "")
+		for _, h := range p.hypotheses {
+			out = append(out, "- [ ] "+h)
+		}
+	}
 	if !learningsWritten {
 		out = append(out, "", "## Learnings (agent updates this)", "")
 		for _, l := range p.learnings {
@@ -184,20 +205,16 @@ func (p *ProgramMD) flush() error {
 	}
 
 	content := strings.Join(out, "\n")
+	p.rawContent = content
 	return os.WriteFile(p.path, []byte(content), 0644)
 }
 
-// markHypothesisInProgress marks a hypothesis as [~] in the file
+// markHypothesisInProgress marks a hypothesis as [~] in the file.
+// Caller must hold p.mu.
 func (p *ProgramMD) markHypothesisInProgress(h string) {
-	data, err := os.ReadFile(p.path)
-	if err != nil {
-		return
-	}
-
-	content := string(data)
 	oldMark := "- [ ] " + h
 	newMark := "- [~] " + h
-	content = strings.Replace(content, oldMark, newMark, 1)
+	p.rawContent = strings.Replace(p.rawContent, oldMark, newMark, 1)
 
-	_ = os.WriteFile(p.path, []byte(content), 0644)
+	_ = os.WriteFile(p.path, []byte(p.rawContent), 0644)
 }

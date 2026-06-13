@@ -34,6 +34,15 @@ sin-websearch serve
 
 # Start HTTP API
 sin-websearch http
+
+# Initialize an alchemist program.md
+sin-websearch alchemist init --template go
+
+# Run a single autonomous alchemist loop
+sin-websearch alchemist run --cmd "go test -bench=." --target train.py
+
+# Run a multi-strategy swarm
+sin-websearch alchemist swarm --cmd "go test -bench=." --runtime 1h
 ```
 
 ## Configuration
@@ -63,6 +72,9 @@ searxng_urls:
 - **Vision prompts**: Claude/GPT-4o/Gemini-ready prompts
 - **Offline HTML briefings**: base64-embedded frames
 - **Multi-agent missions**: explore + librarian agents with verification
+- **Alchemist autoresearch**: Karpathy-style optimization loops with git safety
+- **Swarm-Alchemist**: multi-strategy parallel research with winner selection
+- **Literature-Loader**: periodic sin-websearch refresh of hypotheses
 - **MCP server**: integrate with sin-code, Claude, Cursor, etc.
 - **HTTP REST API**: any app can call it
 - **Infisical secrets**: load keys from Infisical CLI

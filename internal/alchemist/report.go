@@ -5,6 +5,7 @@ package alchemist
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"strings"
 	"text/template"
@@ -49,7 +50,7 @@ func (d *Daemon) generateMorningReport() (*MorningReport, error) {
 	}
 
 	// Diff preview
-	diff, _ := d.git.Diff(nil)
+	diff, _ := d.git.Diff(context.Background())
 	if len(diff) > 3000 {
 		diff = diff[:3000] + "\n\n[... diff truncated ...]"
 	}

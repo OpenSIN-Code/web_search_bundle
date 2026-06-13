@@ -95,11 +95,6 @@ func NewDaemon(cfg Config) (*Daemon, error) {
 		cfg.LiteratureProfile = "technical-deep-dive"
 	}
 
-	hist, err := NewHistory(cfg.RepoPath)
-	if err != nil {
-		return nil, fmt.Errorf("init history: %w", err)
-	}
-
 	git, err := NewGitOps(cfg.RepoPath, cfg.WorkBranch, cfg.Safety)
 	if err != nil {
 		return nil, fmt.Errorf("init git: %w", err)
@@ -116,13 +111,25 @@ func NewDaemon(cfg Config) (*Daemon, error) {
 
 	return &Daemon{
 		cfg:        cfg,
-		history:    hist,
 		git:        git,
 		program:    prog,
 		literature: loader,
 		startTime:  time.Now(),
 		logger:     cfg.Logger,
 	}, nil
+}
+
+// initHistory creates the SQLite history store on the work branch.
+func (d *Daemon) initHistory() error {
+	if d.history != nil {
+		return nil
+	}
+	hist, err := NewHistory(d.cfg.RepoPath)
+	if err != nil {
+		return fmt.Errorf("init history: %w", err)
+	}
+	d.history = hist
+	return nil
 }
 
 // Run executes the autonomous loop until budget/limits are hit or context cancelled
@@ -138,7 +145,7 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 		return nil, fmt.Errorf("safety invariant violated: no run command configured (M3 gate required)")
 	}
 
-	// Create work branch
+	// Create work branch first so the history DB lives on the work branch.
 	if err := d.git.CreateWorkBranch(ctx); err != nil {
 		return nil, fmt.Errorf("create work branch: %w", err)
 	}
@@ -148,6 +155,10 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 			d.git.ReturnToMainBranch(ctx)
 		}
 	}()
+
+	if err := d.initHistory(); err != nil {
+		return nil, err
+	}
 
 	// Hook: SessionStart
 	if d.cfg.HooksEnabled {
@@ -300,6 +311,9 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 }
 
 func (d *Daemon) logRecord(hypothesis string, before, after, delta float64, decision, sha string) {
+	if d.history == nil {
+		return
+	}
 	record := ExperimentRecord{
 		Timestamp:    time.Now(),
 		Hypothesis:   hypothesis,
@@ -321,5 +335,8 @@ func (d *Daemon) fireHook(event string, data map[string]any) {
 
 // Close cleans up daemon resources
 func (d *Daemon) Close() error {
+	if d.history == nil {
+		return nil
+	}
 	return d.history.Close()
 }

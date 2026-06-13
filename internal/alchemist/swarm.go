@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -55,7 +57,6 @@ type SwarmReport struct {
 type Swarm struct {
 	cfg      SwarmConfig
 	repoPath string
-	history  *History
 	strats   []Strategy
 	logger   *slog.Logger
 	winner   *SwarmWorker
@@ -76,11 +77,6 @@ func NewSwarm(cfg SwarmConfig) (*Swarm, error) {
 		strats = append(strats, GetStrategy(name))
 	}
 
-	hist, err := NewHistory(cfg.BaseConfig.RepoPath)
-	if err != nil {
-		return nil, fmt.Errorf("init shared history: %w", err)
-	}
-
 	logger := cfg.BaseConfig.Logger
 	if logger == nil {
 		logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
@@ -89,7 +85,6 @@ func NewSwarm(cfg SwarmConfig) (*Swarm, error) {
 	return &Swarm{
 		cfg:      cfg,
 		repoPath: cfg.BaseConfig.RepoPath,
-		history:  hist,
 		strats:   strats,
 		logger:   logger,
 	}, nil
@@ -165,6 +160,12 @@ func (s *Swarm) runWorker(ctx context.Context, id int, strat Strategy) SwarmWork
 		return worker
 	}
 
+	// Commit the strategy program so the work tree is clean for the daemon.
+	if err := s.commitStrategyProgram(workerCfg.ProgramFile); err != nil {
+		worker.Error = fmt.Errorf("commit strategy program: %w", err)
+		return worker
+	}
+
 	daemon, err := NewDaemon(workerCfg)
 	if err != nil {
 		worker.Error = fmt.Errorf("init daemon: %w", err)
@@ -179,7 +180,7 @@ func (s *Swarm) runWorker(ctx context.Context, id int, strat Strategy) SwarmWork
 	}
 	_ = morningReport
 
-	records, _ := s.history.All()
+	records, _ := daemon.history.All()
 	for _, r := range records {
 		if r.Decision == "committed" {
 			worker.Commits++
@@ -225,6 +226,26 @@ func (s *Swarm) ensureStrategyProgram(strat Strategy, filename string) error {
 	return os.WriteFile(path, []byte(content), 0644)
 }
 
+func (s *Swarm) commitStrategyProgram(filename string) error {
+	cmd := exec.Command("git", "add", filename)
+	cmd.Dir = s.repoPath
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("stage %s: %s: %w", filename, string(out), err)
+	}
+
+	cmd = exec.Command("git", "commit", "-m", "alchemist swarm: add strategy program "+filename)
+	cmd.Dir = s.repoPath
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := string(out)
+		if strings.Contains(msg, "nothing to commit") || strings.Contains(msg, "no changes added") {
+			return nil
+		}
+		return fmt.Errorf("commit %s: %s: %w", filename, msg, err)
+	}
+	return nil
+}
+
 func (s *Swarm) pickWinner(report *SwarmReport) {
 	var best *SwarmWorker
 	for i := range report.Workers {
@@ -259,7 +280,7 @@ func (s *Swarm) aggregateStats(report *SwarmReport) {
 
 // Close releases shared resources.
 func (s *Swarm) Close() error {
-	return s.history.Close()
+	return nil
 }
 
 // RenderMarkdown formats the swarm report as Markdown.
