@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-06-14
+
+### Changed
+
+- Raised minimum Go version to **1.24** (`go.mod` updated).
+- Updated CI matrix to Go **1.24** and **1.25**; lint job now runs on Go **1.25**.
+- Upgraded local toolchain to Go **1.26.4** via Homebrew.
+- Fixed Go 1.26 `vet` finding: non-constant format string in `internal/alchemist/literature.go`.
+
+### Added
+
+- More benchmarks for hot paths:
+  - `internal/engines/video_bench_test.go` — VTT parsing, HTML stripping, video source detection
+  - `internal/resolver/entity_bench_test.go` — entity resolution and query expansion
+  - `internal/verify/verify_bench_test.go` — claim extraction and verification pipeline
+
+### Security
+
+- `govulncheck` now reports **0 vulnerabilities** for our code with Go ≥1.25.
+
+### Documentation
+
+- `README.md` — added HTTP API examples for `/watch`, `/vbrief`, `/vprompt`.
+- `AGENTS.md` — updated HTTP endpoint list and added Go 1.24+ requirement.
+
 ## [0.2.2] - 2026-06-14
 
 ### Security

@@ -53,6 +53,21 @@ curl -X POST http://localhost:8787/api/v1/alchemist \
 curl -X POST http://localhost:8787/api/v1/alchemist/swarm \
   -H 'Content-Type: application/json' \
   -d '{"run_cmd":"echo metric: 0.8","target":"train.py","strategies":["minimal"],"runtime":"1m"}'
+
+# HTTP API: video analysis
+curl -X POST http://localhost:8787/api/v1/watch \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://youtu.be/dQw4w9YgXcQ","max_frames":80,"resolution":768}'
+
+# HTTP API: video briefing
+curl -X POST http://localhost:8787/api/v1/vbrief \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://youtu.be/dQw4w9YgXcQ","preset":"tutorial"}'
+
+# HTTP API: vision prompt
+curl -X POST http://localhost:8787/api/v1/vprompt \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://youtu.be/dQw4w9YgXcQ","prompt":"Describe the key visual moments"}'
 ```
 
 ## Configuration

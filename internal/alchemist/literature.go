@@ -71,7 +71,7 @@ func (l *LiteratureLoader) Refresh(ctx context.Context, topic string) (*Literatu
 
 	if l.sinWebsearchBin == "" {
 		result.Error = "sin-websearch binary not found on PATH"
-		return result, fmt.Errorf(result.Error)
+		return result, fmt.Errorf("%s", result.Error)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, l.timeout)

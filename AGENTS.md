@@ -32,6 +32,8 @@
 
 ## Build & Test
 
+Requires Go 1.24+. CI tests Go 1.24 and 1.25.
+
 ```bash
 go mod tidy
 go build ./cmd/sin-websearch
@@ -61,6 +63,9 @@ go test ./...
 - `POST /api/v1/search` — search
 - `POST /api/v1/pulse` — pulse
 - `POST /api/v1/resolve` — resolve
+- `POST /api/v1/watch` — video analysis
+- `POST /api/v1/vbrief` — offline HTML video briefing
+- `POST /api/v1/vprompt` — Vision-LLM prompt for a video
 - `POST /api/v1/alchemist` — autonomous research loop
 - `POST /api/v1/alchemist/swarm` — multi-strategy swarm
 - `GET /health` — health check

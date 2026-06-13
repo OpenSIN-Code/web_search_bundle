@@ -1,6 +1,6 @@
 module github.com/OpenSIN-Code/web_search_bundle
 
-go 1.23
+go 1.24
 
 require (
 	github.com/mark3labs/mcp-go v0.40.0
