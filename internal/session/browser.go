@@ -106,11 +106,12 @@ func (b *BrowserSession) extractFirefoxCookie(dbPath, domain, name string) (stri
 	tmpDB := filepath.Join(os.TempDir(), "sin_cookies_copy.sqlite")
 	defer os.Remove(tmpDB)
 
-	data, err := os.ReadFile(dbPath)
+	data, err := os.ReadFile(dbPath) // #nosec G304 dbPath is an OS/browser cookie path from getCookieDBPaths
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(tmpDB, data, 0644); err != nil {
+	// tmpDB is a hardcoded filename inside os.TempDir(); not user-controlled.
+	if err := os.WriteFile(tmpDB, data, 0600); err != nil { // #nosec G703 G306
 		return "", err
 	}
 

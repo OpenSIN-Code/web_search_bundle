@@ -22,7 +22,7 @@ type ProgramMD struct {
 
 // LoadProgramMD parses a program.md file
 func LoadProgramMD(path string) (*ProgramMD, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 — caller chooses program.md path
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (p *ProgramMD) flush() error {
 
 	content := strings.Join(out, "\n")
 	p.rawContent = content
-	return os.WriteFile(p.path, []byte(content), 0644)
+	return os.WriteFile(p.path, []byte(content), 0600)
 }
 
 // markHypothesisInProgress marks a hypothesis as [~] in the file.
@@ -216,5 +216,5 @@ func (p *ProgramMD) markHypothesisInProgress(h string) {
 	newMark := "- [~] " + h
 	p.rawContent = strings.Replace(p.rawContent, oldMark, newMark, 1)
 
-	_ = os.WriteFile(p.path, []byte(p.rawContent), 0644)
+	_ = os.WriteFile(p.path, []byte(p.rawContent), 0600)
 }

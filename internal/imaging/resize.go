@@ -26,7 +26,7 @@ func DefaultResizeOptions() ResizeOptions {
 
 // ResizeImage resizes an image to fit within MaxWidth while preserving aspect ratio.
 func ResizeImage(inputPath, outputPath string, opts ResizeOptions) error {
-	in, err := os.Open(inputPath)
+	in, err := os.Open(inputPath) // #nosec G304 — caller chooses image path
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func ResizeImage(inputPath, outputPath string, opts ResizeOptions) error {
 	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 	draw.CatmullRom.Scale(dst, dst.Bounds(), src, bounds, draw.Over, nil)
 
-	out, err := os.Create(outputPath)
+	out, err := os.Create(outputPath) // #nosec G304 — caller chooses output path
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func ResizeImage(inputPath, outputPath string, opts ResizeOptions) error {
 
 // ResizeBatch resizes a batch of images into a directory.
 func ResizeBatch(inputPaths []string, outputDir string, opts ResizeOptions) ([]string, error) {
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
+	if err := os.MkdirAll(outputDir, 0750); err != nil {
 		return nil, fmt.Errorf("create output dir: %w", err)
 	}
 	var outputs []string

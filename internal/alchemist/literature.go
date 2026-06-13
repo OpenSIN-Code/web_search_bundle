@@ -78,7 +78,7 @@ func (l *LiteratureLoader) Refresh(ctx context.Context, topic string) (*Literatu
 	defer cancel()
 
 	args := []string{"mission", topic, "--profile", l.profile, "--json"}
-	cmd := exec.CommandContext(ctx, l.sinWebsearchBin, args...)
+	cmd := exec.CommandContext(ctx, l.sinWebsearchBin, args...) // #nosec G204 — alchemist calls its own binary
 	out, err := cmd.Output()
 	if err != nil {
 		result.Error = fmt.Sprintf("sin-websearch failed: %v", err)

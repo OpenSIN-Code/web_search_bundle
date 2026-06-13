@@ -22,7 +22,7 @@ type Cache struct {
 
 // New opens or creates a cache at the given path.
 func New(path string) (*Cache, error) {
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0750); err != nil {
 		return nil, err
 	}
 
@@ -32,7 +32,7 @@ func New(path string) (*Cache, error) {
 	}
 
 	if err := migrate(db); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, err
 	}
 

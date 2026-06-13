@@ -1,5 +1,6 @@
 # Build artifacts
 /sin-websearch
+bin/
 *.exe
 *.dll
 *.so
@@ -28,3 +29,5 @@ vendor/
 *.tmp
 *.log
 *.db
+/train.py
+gosec_report.json

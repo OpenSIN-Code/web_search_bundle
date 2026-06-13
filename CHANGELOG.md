@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-06-14
+
+### Security
+
+- Resolved all `gosec` findings (down from 53 to 0):
+  - Fixed `G115` integer overflow in `internal/pool/keypool.go` by documenting the modulo-bound conversion.
+  - Fixed `G703` path traversal in `internal/session/browser.go` (temp path is hardcoded) and `internal/alchemist/swarm.go` (sanitized strategy names via `sanitizeStrategyName`).
+  - Hardened directory permissions from `0755` to `0750` for cache, sidecar, video, imaging, briefing, and alchemist history directories.
+  - Hardened internal program file writes from `0644` to `0600` in `internal/alchemist/program_md.go` and `internal/alchemist/swarm.go`.
+  - Added `gitCommand` helper in `internal/alchemist/git_ops.go` to centralize intentional git subprocess calls.
+  - Added documented `#nosec` annotations for CLI-tool patterns that are inherently safe: reading user-supplied file paths, running configured external binaries (git, ffmpeg, yt-dlp), and HTTP requests to search/video endpoints.
+  - Fixed two `G104` unhandled-error findings in `internal/secrets/infisical.go` and `internal/cache/cache.go`.
+
+### Added
+
+- Benchmarks for hot paths:
+  - `internal/clustering/cluster_bench_test.go` — `Clusterer.Cluster` and `similarity`.
+  - `internal/pool/keypool_bench_test.go` — `KeyPool.Next` and `KeyPool.Count`.
+
 ## [0.2.1] - 2026-06-14
 
 ### Fixed

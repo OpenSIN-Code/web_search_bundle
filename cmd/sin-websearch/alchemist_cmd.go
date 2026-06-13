@@ -142,9 +142,9 @@ func newAlchemistRunCmd() *cobra.Command {
 			}
 
 			// Save to file
-			reportPath := filepath.Join(repoPath, ".sin-code",
-				fmt.Sprintf("alchemist-report-%s.md", time.Now().Format("2006-01-02-1504")))
-			_ = os.WriteFile(reportPath, []byte(md), 0644)
+		reportPath := filepath.Join(repoPath, ".sin-code",
+			fmt.Sprintf("alchemist-report-%s.md", time.Now().Format("2006-01-02-1504")))
+		_ = os.WriteFile(reportPath, []byte(md), 0644) // #nosec G306 — user-visible report
 
 			fmt.Println("\n" + md)
 			fmt.Printf("\n📄 Report saved to: %s\n", reportPath)
@@ -274,10 +274,11 @@ func newAlchemistInitCmd() *cobra.Command {
 				return fmt.Errorf("program.md already exists at %s", path)
 			}
 
-			content := getProgramTemplate(template)
-			if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-				return err
-			}
+		content := getProgramTemplate(template)
+		// program.md is a user-visible project file; 0644 is intentional.
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil { // #nosec G306
+			return err
+		}
 
 			fmt.Printf("✓ Created program.md at %s\n", path)
 			fmt.Println("\nEdit the hypotheses queue, then run:")
@@ -421,11 +422,11 @@ Examples:
 			md := report.RenderMarkdown()
 			fmt.Println("\n" + md)
 
-			reportPath := filepath.Join(repoPath, ".sin-code",
-				fmt.Sprintf("swarm-report-%s.md", time.Now().Format("2006-01-02-1504")))
-			_ = os.MkdirAll(filepath.Dir(reportPath), 0755)
-			_ = os.WriteFile(reportPath, []byte(md), 0644)
-			fmt.Printf("📄 Report saved to: %s\n", reportPath)
+		reportPath := filepath.Join(repoPath, ".sin-code",
+			fmt.Sprintf("swarm-report-%s.md", time.Now().Format("2006-01-02-1504")))
+		_ = os.MkdirAll(filepath.Dir(reportPath), 0750)
+		_ = os.WriteFile(reportPath, []byte(md), 0644) // #nosec G306 — user-visible report
+		fmt.Printf("📄 Report saved to: %s\n", reportPath)
 
 			if report.Winner != nil {
 				fmt.Printf("\n🏆 Winner: strategy=%s metric=%.4f\n",

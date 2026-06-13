@@ -215,3 +215,46 @@ func TestBuildAlchemistConfigInvalidBudget(t *testing.T) {
 		t.Fatal("expected error for invalid budget")
 	}
 }
+
+func TestHandleWatchMissingURL(t *testing.T) {
+	s := NewHTTPServer(nil, nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/watch", bytes.NewReader([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	s.handleWatch(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestHandleWatchMethodNotAllowed(t *testing.T) {
+	s := NewHTTPServer(nil, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/watch", nil)
+	rr := httptest.NewRecorder()
+	s.handleWatch(rr, req)
+	if rr.Code != http.StatusMethodNotAllowed {
+		t.Errorf("expected 405, got %d", rr.Code)
+	}
+}
+
+func TestHandleVideoBriefMissingURL(t *testing.T) {
+	s := NewHTTPServer(nil, nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/vbrief", bytes.NewReader([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	s.handleVideoBrief(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestHandleVideoPromptMissingURL(t *testing.T) {
+	s := NewHTTPServer(nil, nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/vprompt", bytes.NewReader([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	s.handleVideoPrompt(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", rr.Code)
+	}
+}

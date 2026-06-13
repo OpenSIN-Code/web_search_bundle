@@ -147,7 +147,7 @@ func (r *Registry) loadFromDir(dir string) error {
 
 // LoadFromFile loads a profile from YAML.
 func LoadFromFile(path string) (*Profile, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 — caller chooses profile file
 	if err != nil {
 		return nil, err
 	}

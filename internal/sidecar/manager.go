@@ -35,7 +35,7 @@ func NewManager() (*Manager, error) {
 	}
 
 	binDir := filepath.Join(home, ".sin-websearch", "bin")
-	if err := os.MkdirAll(binDir, 0755); err != nil {
+	if err := os.MkdirAll(binDir, 0750); err != nil {
 		return nil, err
 	}
 
@@ -127,7 +127,7 @@ func (m *Manager) EnsureBinary(name string) (string, error) {
 	}
 
 	fmt.Printf("⬇️  Downloading %s...\n", name)
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // #nosec G107 — sidecar intentionally downloads from configured URL
 	if err != nil {
 		return "", fmt.Errorf("download failed: %w", err)
 	}
@@ -137,7 +137,7 @@ func (m *Manager) EnsureBinary(name string) (string, error) {
 		return "", fmt.Errorf("download failed: %s", resp.Status)
 	}
 
-	out, err := os.OpenFile(binPath, os.O_CREATE|os.O_WRONLY, 0755)
+	out, err := os.OpenFile(binPath, os.O_CREATE|os.O_WRONLY, 0755) // #nosec G302 G304 — downloaded binaries are managed by the sidecar manager
 	if err != nil {
 		return "", err
 	}
@@ -157,7 +157,7 @@ func (m *Manager) Execute(name string, args ...string) ([]byte, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command(binPath, args...)
+	cmd := exec.Command(binPath, args...) // #nosec G204 — sidecar intentionally executes managed binaries
 	return cmd.CombinedOutput()
 }
 

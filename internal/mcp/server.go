@@ -21,15 +21,22 @@ import (
 	mcpserver "github.com/mark3labs/mcp-go/server"
 )
 
+// Orchestrator describes the search/pulse operations the MCP server needs.
+type Orchestrator interface {
+	Search(ctx context.Context, topic string) (*orchestrator.SearchResult, error)
+	Pulse(ctx context.Context, topic string) (*orchestrator.SearchResult, error)
+	SearchStream(ctx context.Context, topic string) (<-chan orchestrator.StreamResult, error)
+}
+
 // Server wraps the MCP server and application services.
 type Server struct {
-	orchestrator *orchestrator.Orchestrator
+	orchestrator Orchestrator
 	resolver     *resolver.EntityResolver
 	server       *mcpserver.MCPServer
 }
 
 // NewServer creates and configures the MCP server.
-func NewServer(orch *orchestrator.Orchestrator) *Server {
+func NewServer(orch Orchestrator) *Server {
 	s := &Server{
 		orchestrator: orch,
 		resolver:     resolver.NewEntityResolver(),

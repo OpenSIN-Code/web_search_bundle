@@ -8,12 +8,25 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
 )
+
+// sanitizeStrategyName removes characters that could be used for path traversal
+// or invalid git branch names from a strategy name.
+func sanitizeStrategyName(name string) string {
+	// Drop any path separators, parent-directory references, and shell metacharacters.
+	r := regexp.MustCompile(`[\s\\/\x00\x7f\.\*\?\:\\<\>\|\"'` + "`" + `~!@#$%&{}\[\]]+`)
+	cleaned := r.ReplaceAllString(name, "-")
+	cleaned = strings.Trim(cleaned, "-")
+	if cleaned == "" {
+		return "strategy"
+	}
+	return cleaned
+}
 
 // SwarmConfig configures a multi-strategy parallel alchemist run.
 type SwarmConfig struct {
@@ -145,15 +158,16 @@ func (s *Swarm) Run(ctx context.Context) (*SwarmReport, error) {
 }
 
 func (s *Swarm) runWorker(ctx context.Context, id int, strat Strategy) SwarmWorker {
+	safeName := sanitizeStrategyName(strat.Name)
 	worker := SwarmWorker{
 		ID:       id,
 		Strategy: strat,
-		Branch:   fmt.Sprintf("alchemist/swarm/%s/%s", strat.Name, time.Now().Format("20060102-150405")),
+		Branch:   fmt.Sprintf("alchemist/swarm/%s/%s", safeName, time.Now().Format("20060102-150405")),
 	}
 
 	workerCfg := s.cfg.BaseConfig
 	workerCfg.WorkBranch = worker.Branch
-	workerCfg.ProgramFile = fmt.Sprintf("program.%s.md", strat.Name)
+	workerCfg.ProgramFile = fmt.Sprintf("program.%s.md", safeName)
 
 	if err := s.ensureStrategyProgram(strat, workerCfg.ProgramFile); err != nil {
 		worker.Error = fmt.Errorf("setup program.md: %w", err)
@@ -212,7 +226,7 @@ func (s *Swarm) ensureStrategyProgram(strat Strategy, filename string) error {
 	}
 
 	basePath := filepath.Join(s.repoPath, s.cfg.BaseConfig.ProgramFile)
-	base, err := os.ReadFile(basePath)
+	base, err := os.ReadFile(basePath) // #nosec G304 path is constrained by sanitizeStrategyName
 	if err != nil {
 		return err
 	}
@@ -223,18 +237,16 @@ func (s *Swarm) ensureStrategyProgram(strat Strategy, filename string) error {
 	content := header + string(base)
 	content += fmt.Sprintf("\n\n## Strategy Overlay\n\n%s\n", strat.PromptOverlay)
 
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(content), 0600) // #nosec G306 G703 filename is sanitized
 }
 
 func (s *Swarm) commitStrategyProgram(filename string) error {
-	cmd := exec.Command("git", "add", filename)
-	cmd.Dir = s.repoPath
+	cmd := gitCommand(context.Background(), s.repoPath, "add", filename)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("stage %s: %s: %w", filename, string(out), err)
 	}
 
-	cmd = exec.Command("git", "commit", "-m", "alchemist swarm: add strategy program "+filename)
-	cmd.Dir = s.repoPath
+	cmd = gitCommand(context.Background(), s.repoPath, "commit", "-m", "alchemist swarm: add strategy program "+filename)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		msg := string(out)

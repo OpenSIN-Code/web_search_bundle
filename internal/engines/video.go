@@ -67,7 +67,7 @@ type VideoEngine struct {
 // NewVideoEngine creates a video engine.
 func NewVideoEngine(sc *sidecar.Manager) *VideoEngine {
 	workDir := filepath.Join(os.TempDir(), "sin-websearch-video")
-	if err := os.MkdirAll(workDir, 0755); err != nil {
+	if err := os.MkdirAll(workDir, 0750); err != nil {
 		// Best-effort temp directory creation; log and continue.
 		fmt.Fprintf(os.Stderr, "video workdir: %v\n", err)
 	}
@@ -97,7 +97,7 @@ func (e *VideoEngine) Watch(ctx context.Context, opts WatchOptions) (*VideoAnaly
 	if opts.OutDir != "" {
 		sessionDir = opts.OutDir
 	}
-	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+	if err := os.MkdirAll(sessionDir, 0750); err != nil {
 		return nil, fmt.Errorf("session dir: %w", err)
 	}
 
@@ -147,7 +147,7 @@ func (e *VideoEngine) getMetadata(ctx context.Context, url string) (*videoMetada
 	if err != nil {
 		return &videoMetadata{Title: url, Duration: 0}, nil
 	}
-	cmd := exec.CommandContext(ctx, ytdlp, url, "--dump-json", "--no-download", "--no-warnings", "--quiet")
+	cmd := exec.CommandContext(ctx, ytdlp, url, "--dump-json", "--no-download", "--no-warnings", "--quiet") // #nosec G204
 	out, err := cmd.Output()
 	if err != nil {
 		return &videoMetadata{Title: url, Duration: 0}, nil
@@ -201,7 +201,7 @@ func (e *VideoEngine) extractFrames(ctx context.Context, opts WatchOptions, sess
 		filepath.Join(sessionDir, "frame_%04d.jpg"),
 	)
 
-	cmd := exec.CommandContext(ctx, ffmpeg, args...)
+	cmd := exec.CommandContext(ctx, ffmpeg, args...) // #nosec G204
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("ffmpeg: %w", err)
 	}
@@ -242,11 +242,11 @@ func (e *VideoEngine) getTranscript(ctx context.Context, opts WatchOptions, sess
 		"--sub-format", "vtt",
 		"-o", filepath.Join(sessionDir, "subs"),
 		"--no-warnings", "--quiet",
-	)
+	) // #nosec G204
 	if err := cmd.Run(); err == nil {
 		for _, lang := range []string{"en", "de"} {
 			path := filepath.Join(sessionDir, "subs."+lang+".vtt")
-			if data, err := os.ReadFile(path); err == nil {
+			if data, err := os.ReadFile(path); err == nil { // #nosec G304 — path is built inside session dir
 				text := parseVTT(string(data))
 				if len(text) > 100 {
 					return text, "native", "", nil
@@ -269,7 +269,7 @@ func (e *VideoEngine) getTranscript(ctx context.Context, opts WatchOptions, sess
 		"-y", "-i", opts.URL,
 		"-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
 		audioPath,
-	)
+	) // #nosec G204
 	if err := cmd.Run(); err != nil {
 		return "", "none", audioPath, fmt.Errorf("audio extraction failed: %w", err)
 	}

@@ -50,7 +50,7 @@ func (c *InfisicalClient) LoadAllSecrets() map[string]string {
 	for _, name := range names {
 		if val := c.getSecret(name); val != "" {
 			result[name] = val
-			os.Setenv(name, val)
+			_ = os.Setenv(name, val) // best-effort env update; failures are non-fatal
 		}
 	}
 	return result
@@ -73,7 +73,7 @@ func (c *InfisicalClient) getSecret(name string) string {
 	if val := os.Getenv(name); val != "" {
 		return val
 	}
-	cmd := exec.Command("infisical", "secrets", "get", name,
+	cmd := exec.Command("infisical", "secrets", "get", name, // #nosec G204 — infisical CLI is a fixed binary
 		"--projectId="+c.projectID, "--env="+c.env, "--plain", "--silent")
 	out, err := cmd.Output()
 	if err != nil {

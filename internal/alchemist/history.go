@@ -23,7 +23,7 @@ type History struct {
 func NewHistory(repoPath string) (*History, error) {
 	dbPath := filepath.Join(repoPath, ".sin-code", "alchemist.db")
 
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0750); err != nil {
 		return nil, err
 	}
 

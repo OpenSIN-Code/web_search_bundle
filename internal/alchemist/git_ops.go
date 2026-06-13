@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+// gitCommand builds a git command in the managed repo.
+// All git subprocesses are intentional; the alchemist is a git automation tool.
+func gitCommand(ctx context.Context, dir string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, "git", args...) // #nosec G204
+	cmd.Dir = dir
+	return cmd
+}
+
 // Snapshot captures git state for rollback
 type Snapshot struct {
 	Branch    string
@@ -53,8 +61,7 @@ func (g *GitOps) CreateWorkBranch(ctx context.Context) error {
 		return fmt.Errorf("working tree is dirty; commit or stash before starting alchemist")
 	}
 
-	cmd := exec.CommandContext(ctx, "git", "checkout", "-b", g.workBranch)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "checkout", "-b", g.workBranch)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("create branch: %s: %w", string(out), err)
 	}
@@ -63,8 +70,7 @@ func (g *GitOps) CreateWorkBranch(ctx context.Context) error {
 
 // ReturnToMainBranch switches back to the main branch (headless cleanup)
 func (g *GitOps) ReturnToMainBranch(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, "git", "checkout", g.mainBranch)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "checkout", g.mainBranch)
 	_ = cmd.Run()
 	return nil
 }
@@ -94,15 +100,13 @@ func (g *GitOps) Restore(ctx context.Context, snap *Snapshot) error {
 	}
 
 	// Hard reset to the snapshot commit
-	cmd := exec.CommandContext(ctx, "git", "reset", "--hard", snap.CommitSHA)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "reset", "--hard", snap.CommitSHA)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("reset: %s: %w", string(out), err)
 	}
 
 	// Clean untracked files
-	cmd = exec.CommandContext(ctx, "git", "clean", "-fd")
-	cmd.Dir = g.repoPath
+	cmd = gitCommand(ctx, g.repoPath, "clean", "-fd")
 	_ = cmd.Run()
 
 	return nil
@@ -116,15 +120,13 @@ func (g *GitOps) CommitIfImproved(ctx context.Context, metricValue float64, mess
 	}
 
 	// Stage all changes
-	cmd := exec.CommandContext(ctx, "git", "add", "-A")
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "add", "-A")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("stage: %s: %w", string(out), err)
 	}
 
 	// Check if anything to commit
-	cmd = exec.CommandContext(ctx, "git", "diff", "--cached", "--quiet")
-	cmd.Dir = g.repoPath
+	cmd = gitCommand(ctx, g.repoPath, "diff", "--cached", "--quiet")
 	if err := cmd.Run(); err == nil {
 		// No changes
 		sha, _ := g.currentSHA(ctx)
@@ -133,8 +135,7 @@ func (g *GitOps) CommitIfImproved(ctx context.Context, metricValue float64, mess
 
 	// Commit with metric in message
 	fullMsg := fmt.Sprintf("%s\n\nAlchemist: metric=%.4f\nSafety: %s", message, metricValue, g.safety)
-	cmd = exec.CommandContext(ctx, "git", "commit", "-m", fullMsg)
-	cmd.Dir = g.repoPath
+	cmd = gitCommand(ctx, g.repoPath, "commit", "-m", fullMsg)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("commit: %s: %w", string(out), err)
 	}
@@ -148,8 +149,7 @@ func (g *GitOps) Push(ctx context.Context) error {
 	if g.safety != SafetyInteractive {
 		return fmt.Errorf("push forbidden in %s mode (safety invariant)", g.safety)
 	}
-	cmd := exec.CommandContext(ctx, "git", "push", "-u", "origin", g.workBranch)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "push", "-u", "origin", g.workBranch)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("push: %s: %w", string(out), err)
 	}
@@ -158,8 +158,7 @@ func (g *GitOps) Push(ctx context.Context) error {
 
 // Diff returns the diff between main and work branch
 func (g *GitOps) Diff(ctx context.Context) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "diff", g.mainBranch+"..."+g.workBranch)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "diff", g.mainBranch+"..."+g.workBranch)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", err
@@ -169,8 +168,7 @@ func (g *GitOps) Diff(ctx context.Context) (string, error) {
 
 // LogRecentCommits returns last N commits on work branch
 func (g *GitOps) LogRecentCommits(ctx context.Context, n int) ([]string, error) {
-	cmd := exec.CommandContext(ctx, "git", "log", "--oneline", "-n", fmt.Sprintf("%d", n), g.workBranch)
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "log", "--oneline", "-n", fmt.Sprintf("%d", n), g.workBranch)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
@@ -199,8 +197,7 @@ func (g *GitOps) Stats(ctx context.Context) (map[string]any, error) {
 // --- helpers ---
 
 func (g *GitOps) currentBranch(ctx context.Context) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD")
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "rev-parse", "--abbrev-ref", "HEAD")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -209,8 +206,7 @@ func (g *GitOps) currentBranch(ctx context.Context) (string, error) {
 }
 
 func (g *GitOps) currentSHA(ctx context.Context) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", "rev-parse", "HEAD")
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "rev-parse", "HEAD")
 	out, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -219,8 +215,7 @@ func (g *GitOps) currentSHA(ctx context.Context) (string, error) {
 }
 
 func (g *GitOps) isDirty(ctx context.Context) (bool, error) {
-	cmd := exec.CommandContext(ctx, "git", "status", "--porcelain")
-	cmd.Dir = g.repoPath
+	cmd := gitCommand(ctx, g.repoPath, "status", "--porcelain")
 	out, err := cmd.Output()
 	if err != nil {
 		return false, err
@@ -229,9 +224,8 @@ func (g *GitOps) isDirty(ctx context.Context) (bool, error) {
 }
 
 func (g *GitOps) countCommits(ctx context.Context) (int, error) {
-	cmd := exec.CommandContext(ctx, "git", "rev-list", "--count",
+	cmd := gitCommand(ctx, g.repoPath, "rev-list", "--count",
 		fmt.Sprintf("%s..%s", g.mainBranch, g.workBranch))
-	cmd.Dir = g.repoPath
 	out, err := cmd.Output()
 	if err != nil {
 		return 0, err
@@ -242,14 +236,12 @@ func (g *GitOps) countCommits(ctx context.Context) (int, error) {
 }
 
 func detectMainBranch(repoPath string) (string, error) {
-	cmd := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD")
-	cmd.Dir = repoPath
+	cmd := gitCommand(context.Background(), repoPath, "symbolic-ref", "refs/remotes/origin/HEAD")
 	out, err := cmd.Output()
 	if err != nil {
 		// Fallback: try common names
 		for _, name := range []string{"main", "master"} {
-			check := exec.Command("git", "rev-parse", "--verify", name)
-			check.Dir = repoPath
+			check := gitCommand(context.Background(), repoPath, "rev-parse", "--verify", name)
 			if check.Run() == nil {
 				return name, nil
 			}

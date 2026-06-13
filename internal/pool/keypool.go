@@ -57,7 +57,10 @@ func (p *KeyPool) Next() (string, error) {
 		return "", errors.New("no keys available")
 	}
 
-	startIdx := int(atomic.AddUint64(&p.offset, 1) % uint64(len(p.keys)))
+	// The modulo guarantees the value is < len(p.keys), so the int conversion
+	// is always within Go's int range for any realistic key pool.
+	offset := atomic.AddUint64(&p.offset, 1)
+	startIdx := int(offset % uint64(len(p.keys))) // #nosec G115
 	for i := 0; i < len(p.keys); i++ {
 		idx := (startIdx + i) % len(p.keys)
 		key := p.keys[idx]

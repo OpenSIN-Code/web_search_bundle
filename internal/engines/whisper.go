@@ -54,7 +54,7 @@ func postWhisper(ctx context.Context, audioPath, apiKey, url, model string) (str
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	file, err := os.Open(audioPath)
+	file, err := os.Open(audioPath) // #nosec G304 — audio path is from video session dir
 	if err != nil {
 		return "", err
 	}

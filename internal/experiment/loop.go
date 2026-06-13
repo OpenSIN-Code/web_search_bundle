@@ -54,7 +54,7 @@ func (l *Loop) Run(ctx context.Context) (*Result, error) {
 	ctx, cancel := context.WithTimeout(ctx, l.cfg.Budget)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, l.cfg.RunCmd[0], l.cfg.RunCmd[1:]...)
+	cmd := exec.CommandContext(ctx, l.cfg.RunCmd[0], l.cfg.RunCmd[1:]...) // #nosec G204 — experiment intentionally runs user-defined verification command
 
 	start := time.Now()
 	outBytes, err := cmd.CombinedOutput()

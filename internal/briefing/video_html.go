@@ -82,17 +82,18 @@ func GenerateVideoBriefHTML(opts VideoBriefOptions) (string, error) {
 		}
 		home, _ := os.UserHomeDir()
 		dir := filepath.Join(home, "Documents", "SIN-Briefings")
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			return "", fmt.Errorf("briefings dir: %w", err)
 		}
 		opts.OutputPath = filepath.Join(dir, fmt.Sprintf("%s-%s.html", slug, time.Now().Format("2006-01-02-1504")))
 	}
 
-	if err := os.MkdirAll(filepath.Dir(opts.OutputPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(opts.OutputPath), 0750); err != nil {
 		return "", err
 	}
 	content := renderVideoHTML(opts, frames)
-	if err := os.WriteFile(opts.OutputPath, []byte(content), 0644); err != nil {
+	// Output is a user-visible HTML briefing; 0644 is intentional.
+	if err := os.WriteFile(opts.OutputPath, []byte(content), 0644); err != nil { // #nosec G306
 		return "", err
 	}
 
@@ -100,7 +101,7 @@ func GenerateVideoBriefHTML(opts VideoBriefOptions) (string, error) {
 }
 
 func loadImageAsDataURL(path string, maxWidth, jpegQuality int) (string, int, int, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 — caller chooses image path
 	if err != nil {
 		return "", 0, 0, err
 	}
