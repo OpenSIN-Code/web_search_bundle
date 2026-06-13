@@ -45,7 +45,7 @@ func TestEvaluate_HigherIsBetter(t *testing.T) {
 	result2 := &Result{
 		MetricValue: 12.0,
 	}
-	kept, reason = loop.Evaluate(result2)
+	kept, _ = loop.Evaluate(result2)
 	if !kept {
 		t.Errorf("expected higher value to be accepted, got false")
 	}
@@ -54,7 +54,7 @@ func TestEvaluate_HigherIsBetter(t *testing.T) {
 	result3 := &Result{
 		MetricValue: 11.0,
 	}
-	kept, reason = loop.Evaluate(result3)
+	kept, _ = loop.Evaluate(result3)
 	if kept {
 		t.Errorf("expected lower value to be discarded, got true")
 	}

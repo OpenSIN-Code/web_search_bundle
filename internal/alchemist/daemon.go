@@ -12,7 +12,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/OpenSIN-Code/web_search_bundle/internal/experiment"
@@ -71,7 +70,6 @@ type Daemon struct {
 	program         *ProgramMD
 	literature      *LiteratureLoader
 	baseline        float64
-	mu              sync.Mutex
 	experimentCount int
 	startTime       time.Time
 	logger          *slog.Logger
@@ -152,7 +150,9 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 	defer func() {
 		if d.cfg.Safety == SafetyHeadless {
 			// In headless mode, return to original branch, don't keep work branch
-			d.git.ReturnToMainBranch(ctx)
+			if err := d.git.ReturnToMainBranch(ctx); err != nil {
+				d.logger.Warn("return to main branch failed", "err", err)
+			}
 		}
 	}()
 
@@ -226,7 +226,9 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 		result, err := expLoop.Run(loopCtx)
 		if err != nil {
 			d.logger.Error("run failed", "err", err)
-			d.git.Restore(ctx, snapshot)
+			if err := d.git.Restore(ctx, snapshot); err != nil {
+				d.logger.Error("restore failed", "err", err)
+			}
 			d.logRecord(hypothesis, 0, 0, 0, "error", "")
 			continue
 		}
@@ -244,16 +246,19 @@ func (d *Daemon) Run(ctx context.Context) (*MorningReport, error) {
 				d.logger.Info("headless mode: would commit but safety denies",
 					"metric", result.MetricValue, "reason", reason)
 			} else {
-				msg := fmt.Sprintf("exp: %s (%s)", hypothesis, reason)
-				sha, err := d.git.CommitIfImproved(ctx, result.MetricValue, msg)
-				if err != nil {
-					d.logger.Error("commit failed", "err", err)
-					d.git.Restore(ctx, snapshot)
-					decision = "commit-failed"
-				} else {
-					commitSHA = sha
-					d.baseline = result.MetricValue
+			msg := fmt.Sprintf("exp: %s (%s)", hypothesis, reason)
+			sha, err := d.git.CommitIfImproved(ctx, result.MetricValue, msg)
+			if err != nil {
+				d.logger.Error("commit failed", "err", err)
+				if err := d.git.Restore(ctx, snapshot); err != nil {
+					d.logger.Error("restore failed", "err", err)
 				}
+				decision = "commit-failed"
+			} else {
+				commitSHA = sha
+				d.baseline = result.MetricValue
+			}
+
 			}
 		} else {
 			decision = "discarded"

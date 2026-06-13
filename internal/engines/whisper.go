@@ -67,10 +67,18 @@ func postWhisper(ctx context.Context, audioPath, apiKey, url, model string) (str
 	if _, err := io.Copy(part, file); err != nil {
 		return "", err
 	}
-	writer.WriteField("model", model)
-	writer.WriteField("response_format", "json")
-	writer.WriteField("language", "en")
-	writer.Close()
+	if err := writer.WriteField("model", model); err != nil {
+		return "", err
+	}
+	if err := writer.WriteField("response_format", "json"); err != nil {
+		return "", err
+	}
+	if err := writer.WriteField("language", "en"); err != nil {
+		return "", err
+	}
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
 	if err != nil {

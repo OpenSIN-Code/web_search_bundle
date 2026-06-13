@@ -67,7 +67,10 @@ type VideoEngine struct {
 // NewVideoEngine creates a video engine.
 func NewVideoEngine(sc *sidecar.Manager) *VideoEngine {
 	workDir := filepath.Join(os.TempDir(), "sin-websearch-video")
-	os.MkdirAll(workDir, 0755)
+	if err := os.MkdirAll(workDir, 0755); err != nil {
+		// Best-effort temp directory creation; log and continue.
+		fmt.Fprintf(os.Stderr, "video workdir: %v\n", err)
+	}
 	return &VideoEngine{
 		sidecar:     sc,
 		workDir:     workDir,
@@ -91,10 +94,11 @@ func (e *VideoEngine) Watch(ctx context.Context, opts WatchOptions) (*VideoAnaly
 
 	hash := sha256.Sum256([]byte(opts.URL + opts.Start + opts.End))
 	sessionDir := filepath.Join(e.workDir, hex.EncodeToString(hash[:])[:12])
-	os.MkdirAll(sessionDir, 0755)
 	if opts.OutDir != "" {
 		sessionDir = opts.OutDir
-		os.MkdirAll(sessionDir, 0755)
+	}
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		return nil, fmt.Errorf("session dir: %w", err)
 	}
 
 	analysis := &VideoAnalysis{

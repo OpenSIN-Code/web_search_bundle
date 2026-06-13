@@ -203,14 +203,10 @@ func writeSSE(w http.ResponseWriter, event string, data interface{}) {
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
-}
-
-func redact(s string) string {
-	if len(s) <= 8 {
-		return "***"
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		// Response already started; best-effort log to stderr.
+		fmt.Fprintf(os.Stderr, "http writeJSON: %v\n", err)
 	}
-	return s[:4] + strings.Repeat("*", len(s)-8) + s[len(s)-4:]
 }
 
 // AlchemistRequest configures a single autonomous research loop.
