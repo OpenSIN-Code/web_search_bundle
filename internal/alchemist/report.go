@@ -130,7 +130,8 @@ _Review and push manually: ` + "`git push -u origin {{.WorkBranch}}`" + `_
 
 	t, err := template.New("report").Funcs(funcMap).Parse(tmpl)
 	if err != nil {
-		return "", err
+		// Fallback to simple rendering if the template itself cannot be parsed.
+		return r.renderSimple(), nil
 	}
 
 	// Simpler approach: render without template helpers that need methods

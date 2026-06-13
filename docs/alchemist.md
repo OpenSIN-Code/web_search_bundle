@@ -95,6 +95,41 @@ When `sin-websearch serve` is running, agents can call:
 
 Add `strategies` to run in swarm mode.
 
+## HTTP API
+
+Start the server with `sin-websearch http` (default port `8787`).
+
+### Single alchemist loop
+
+```bash
+curl -X POST http://localhost:8787/api/v1/alchemist \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "repo_path": ".",
+    "run_cmd": "python train.py --eval",
+    "target": "train.py",
+    "metric": "val_bpb",
+    "regex": "val_bpb:\\s*([0-9\\.]+)",
+    "max_experiments": 3,
+    "safety": "headless"
+  }'
+```
+
+### Swarm
+
+```bash
+curl -X POST http://localhost:8787/api/v1/alchemist/swarm \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "run_cmd": "python train.py --eval",
+    "target": "train.py",
+    "strategies": ["conservative", "aggressive", "creative", "minimal"],
+    "runtime": "1h"
+  }'
+```
+
+The response contains `report` (JSON) and `report_markdown`.
+
 ## Notes
 
 - The alchemist creates a local work branch `alchemist/<timestamp>`.

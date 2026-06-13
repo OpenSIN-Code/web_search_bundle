@@ -43,6 +43,16 @@ sin-websearch alchemist run --cmd "go test -bench=." --target train.py
 
 # Run a multi-strategy swarm
 sin-websearch alchemist swarm --cmd "go test -bench=." --runtime 1h
+
+# HTTP API: alchemist loop
+curl -X POST http://localhost:8787/api/v1/alchemist \
+  -H 'Content-Type: application/json' \
+  -d '{"run_cmd":"echo metric: 0.8","target":"train.py","max_experiments":3}'
+
+# HTTP API: alchemist swarm
+curl -X POST http://localhost:8787/api/v1/alchemist/swarm \
+  -H 'Content-Type: application/json' \
+  -d '{"run_cmd":"echo metric: 0.8","target":"train.py","strategies":["minimal"],"runtime":"1m"}'
 ```
 
 ## Configuration

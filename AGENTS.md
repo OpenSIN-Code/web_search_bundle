@@ -61,6 +61,8 @@ go test ./...
 - `POST /api/v1/search` — search
 - `POST /api/v1/pulse` — pulse
 - `POST /api/v1/resolve` — resolve
+- `POST /api/v1/alchemist` — autonomous research loop
+- `POST /api/v1/alchemist/swarm` — multi-strategy swarm
 - `GET /health` — health check
 
 ## Dependencies
