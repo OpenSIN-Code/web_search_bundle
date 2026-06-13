@@ -1,5 +1,5 @@
 # Build artifacts
-sin-websearch
+/sin-websearch
 *.exe
 *.dll
 *.so

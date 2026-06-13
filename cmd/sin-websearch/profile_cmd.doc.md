@@ -1,0 +1,6 @@
+# profile_cmd.go
+
+Cobra CLI command for `profile`.
+
+- Docs: profile_cmd.doc.md
+- See: cmd/sin-websearch/main.go for command wiring.
