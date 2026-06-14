@@ -119,12 +119,18 @@ else
     exit 1
 fi
 
-# Verify checksum if sha256sum is available.
+# Verify checksum for the downloaded binary if sha256sum is available.
 if command -v sha256sum >/dev/null 2>&1; then
-    (cd "$TMP_DIR" && sha256sum -c checksums.txt --strict --quiet 2>/dev/null) || {
-        echo "Checksum verification failed" >&2
+    EXPECTED=$(grep "  ${BINARY_NAME}$" "${TMP_DIR}/checksums.txt" | awk '{print $1}')
+    ACTUAL=$(sha256sum "${TMP_DIR}/${BINARY_NAME}" | awk '{print $1}')
+    if [[ -z "$EXPECTED" ]]; then
+        echo "Could not find checksum for ${BINARY_NAME}" >&2
         exit 1
-    }
+    fi
+    if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+        echo "Checksum verification failed for ${BINARY_NAME}" >&2
+        exit 1
+    fi
 else
     echo "sha256sum not available; skipping checksum verification" >&2
 fi
