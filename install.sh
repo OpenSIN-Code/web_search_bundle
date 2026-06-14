@@ -82,12 +82,13 @@ fi
 
 BINARY_NAME="sin-websearch-${OS}-${ARCH}${EXT}"
 
-# Fetch the latest release metadata.
+# Fetch the latest release metadata. Use GITHUB_TOKEN if available to avoid
+# GitHub API rate limits (common in CI runners).
 if [[ -z "$VERSION" ]]; then
     if command -v curl >/dev/null 2>&1; then
-        RELEASE_JSON=$(curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: token ${GITHUB_TOKEN}"} "$API_URL")
+        RELEASE_JSON=$(curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} "$API_URL")
     elif command -v wget >/dev/null 2>&1; then
-        RELEASE_JSON=$(wget -qO- ${GITHUB_TOKEN:+--header="Authorization: token ${GITHUB_TOKEN}"} "$API_URL")
+        RELEASE_JSON=$(wget -qO- ${GITHUB_TOKEN:+--header="Authorization: Bearer ${GITHUB_TOKEN}"} "$API_URL")
     else
         echo "curl or wget is required" >&2
         exit 1

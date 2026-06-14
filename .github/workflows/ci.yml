@@ -51,6 +51,8 @@ jobs:
 
       - name: Test install.sh
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           INSTALL_DIR=$(mktemp -d)
           ./install.sh --dir "${INSTALL_DIR}"
