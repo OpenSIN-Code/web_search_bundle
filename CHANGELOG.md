@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-06-14
+
+### Fixed
+
+- **Release binaries** now inject `version`, `commit`, and `build date` via ldflags so `sin-websearch --version` reports the correct release tag instead of `dev`.
+- **install.sh** now uses `Authorization: Bearer` when `GITHUB_TOKEN` is set to avoid GitHub API rate limits on CI runners.
+- **CI install.sh test** passes `secrets.GITHUB_TOKEN` to the installer.
+- **golangci-lint-action** now uses `install-mode: goinstall` to build golangci-lint from source with the workflow's Go version, avoiding the prebuilt-binary Go-version mismatch.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.4.1] - 2026-06-14
 
 ### Fixed
