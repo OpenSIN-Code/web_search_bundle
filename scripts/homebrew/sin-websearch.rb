@@ -3,28 +3,28 @@
 class SinWebsearch < Formula
   desc "Unified Intelligence Gateway for OpenSIN"
   homepage "https://github.com/OpenSIN-Code/web_search_bundle"
-  version "0.3.0"
+  version "0.4.0"
   license "MIT"
 
   on_macos do
     on_intel do
-      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.3.0/sin-websearch-darwin-amd64"
-      sha256 "8f0cd8470ab7d047519d79e481d380f69769c3f35719e84e528efeb1ec9f56ee"
+      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.4.0/sin-websearch-darwin-amd64"
+      sha256 "b32f5de61bc4d2dfe5a69e4a9084a9e8309f40aadd313382b2f226eee97e4304"
     end
     on_arm do
-      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.3.0/sin-websearch-darwin-arm64"
-      sha256 "6d3e528e80c49d84fbe9575f80766f325fbd61e65662d251428a42e66b90c476"
+      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.4.0/sin-websearch-darwin-arm64"
+      sha256 "ca7295ef9fe3b43f40a98b4d70e64f390acffd4d18d23ed789abcf2725974e94"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.3.0/sin-websearch-linux-amd64"
-      sha256 "6fa60e479b39b5e44bd9eaff7d6c2f229c57c171d4cdb8e0477a9e344f914a45"
+      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.4.0/sin-websearch-linux-amd64"
+      sha256 "f5c48b2dc1c028c42ebaac04612fd777e62f4f01628bedce18cffe29dd3cea0b"
     end
     on_arm do
-      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.3.0/sin-websearch-linux-arm64"
-      sha256 "59a97ea16eda3c0f885a63cfc0f4e3d04440e195383ba6fd6e87e8fc523c9415"
+      url "https://github.com/OpenSIN-Code/web_search_bundle/releases/download/v0.4.0/sin-websearch-linux-arm64"
+      sha256 "d6eff912eee61ba4c0d58ffe22e30108055cacace42fac1b6212b52760f09ca5"
     end
   end
 
