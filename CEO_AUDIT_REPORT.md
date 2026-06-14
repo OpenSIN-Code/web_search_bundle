@@ -1,6 +1,6 @@
 # CEO Audit — web_search_bundle
 
-**Generated:** 2026-06-14T07:43:02Z
+**Generated:** 2026-06-14T07:49:50Z
 **Profile:** FULL
 **Auditor:** CEO Audit v1.0 (SIN-Code Tool Suite)
 
@@ -11,11 +11,11 @@
 | Metric | Value |
 |--------|-------|
 | **Grade** | **🏆 A+** |
-| **Score** | **99.2/100** |
-| **Total findings** | 2 |
+| **Score** | **99.4/100** |
+| **Total findings** | 1 |
 | **Critical** | 0 |
 | **High** | 0 |
-| **Estimated fix cost** | ~2.0 hours |
+| **Estimated fix cost** | ~1.5 hours |
 | **Top risk** | Low test coverage (Go) (MEDIUM) |
 
 **SOTA-ready. Ship it.** This codebase meets the highest standard of security, quality, and maintainability. Deploy with confidence.
@@ -30,25 +30,23 @@
 | Performance | 100 | 10% | 10.0 | 0 |
 | Quality | 100 | 15% | 15.0 | 0 |
 | Testing | 96 | 15% | 14.4 | 1 |
-| Deps | 99 | 15% | 14.8 | 1 |
+| Deps | 100 | 15% | 15.0 | 0 |
 | Docs | 100 | 5% | 5.0 | 0 |
 | Architecture | 100 | 5% | 5.0 | 0 |
 | Compliance | 100 | 5% | 5.0 | 0 |
 
-**Weighted total: 99.2/100**
+**Weighted total: 99.4/100**
 
 ---
 
 ## Top 3 Risks
 
 - **MEDIUM** — Low test coverage (Go) (risk: 0.4)
-- **LOW** — Outdated Go modules (risk: 0.2)
 
 ---
 
 ## Findings by Severity
 
-- **LOW**: 1
 - **MEDIUM**: 1
 
 ---
@@ -59,15 +57,8 @@
 ### Testing (1 findings)
 
 - **[MEDIUM]** Low test coverage (Go) (risk: 0)
-  - 0.0%
+  - 23.7%
   - Fix: Add tests, focus on handlers and business logic
-
-
-### Deps (1 findings)
-
-- **[LOW]** Outdated Go modules (risk: 0)
-  - 7 modules behind
-  - Fix: Update incrementally with 'go get -u'
 
 
 ---
@@ -85,16 +76,14 @@
 
 ## Action Plan (ROI-ranked)
 
-1. **[LOW]** Outdated Go modules — ~0.5h, ROI: 0.40
-   - Update incrementally with 'go get -u'
-2. **[MEDIUM]** Low test coverage (Go) — ~1.5h, ROI: 0.27
+1. **[MEDIUM]** Low test coverage (Go) — ~1.5h, ROI: 0.27
    - Add tests, focus on handlers and business logic
 
 ---
 
 ## Regression vs Last Audit
 
-- **2** new findings
+- **1** new findings
 - **0** findings fixed since last audit
 
 ---
@@ -102,23 +91,15 @@
 ## Appendix: All Findings
 
 <details>
-<summary>Click to expand 2 findings</summary>
+<summary>Click to expand 1 findings</summary>
 
 ### 4.1 — Low test coverage (Go)
 - **Axis:** testing
 - **Severity:** MEDIUM
 - **CWE:** TEST-COVERAGE
 - **Risk score:** 0
-- **Description:** 0.0%
+- **Description:** 23.7%
 - **Fix:** Add tests, focus on handlers and business logic
-
-### 5.2 — Outdated Go modules
-- **Axis:** deps
-- **Severity:** LOW
-- **CWE:** DEP-OUTDATED
-- **Risk score:** 0
-- **Description:** 7 modules behind
-- **Fix:** Update incrementally with 'go get -u'
 
 
 </details>

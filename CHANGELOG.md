@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-06-14
+
+### Added
+
+- Tests for `cmd/sin-websearch` command builders.
+- Tests for `internal/alchemist` report rendering (`report.go`).
+- Regenerated `sbom.spdx.json` and `bom.json` with updated dependency metadata.
+
+### Changed
+
+- Updated additional indirect dependencies to their latest available versions.
+- `go.mod` now tracks `go 1.25.5` with `toolchain go1.26.4`.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.6] - 2026-06-14
 
 ### Added
