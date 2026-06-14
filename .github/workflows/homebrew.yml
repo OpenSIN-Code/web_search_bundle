@@ -5,6 +5,12 @@ name: Update Homebrew Formula
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to update the formula for (e.g. v0.4.0)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -25,6 +31,8 @@ jobs:
           sudo apt-get install -y jq curl
 
       - name: Update Homebrew formula
+        env:
+          TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
         run: ./scripts/homebrew/update_formula.sh
 
       - name: Configure Git
@@ -41,6 +49,6 @@ jobs:
             echo "No formula changes to commit."
             exit 0
           fi
-          git commit -m "chore(homebrew): update formula for ${GITHUB_REF_NAME}"
+          git commit -m "chore(homebrew): update formula for ${TAG:-latest}"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin HEAD:main

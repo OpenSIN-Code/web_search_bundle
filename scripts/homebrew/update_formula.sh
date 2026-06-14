@@ -6,9 +6,12 @@ set -euo pipefail
 REPO="OpenSIN-Code/web_search_bundle"
 FORMULA="${1:-scripts/homebrew/sin-websearch.rb}"
 
-# Fetch the latest release metadata from GitHub.
-RELEASE_JSON=$(curl -sL --retry 3 --retry-delay 2 "https://api.github.com/repos/${REPO}/releases/latest")
-TAG=$(echo "${RELEASE_JSON}" | jq -r '.tag_name')
+# Fetch release metadata from GitHub. Prefer an explicit TAG, otherwise latest.
+TAG="${TAG:-}"
+if [[ -z "${TAG}" ]]; then
+  RELEASE_JSON=$(curl -sL --retry 3 --retry-delay 2 "https://api.github.com/repos/${REPO}/releases/latest")
+  TAG=$(echo "${RELEASE_JSON}" | jq -r '.tag_name')
+fi
 VERSION="${TAG#v}"
 
 TMPDIR=$(mktemp -d)
