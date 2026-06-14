@@ -1,21 +1,30 @@
-# Purpose: Build and test tasks for sin-websearch.
+# Purpose: Common development tasks for sin-websearch.
 # Docs: Makefile.doc.md
 
-BINARY := sin-websearch
-
-.PHONY: build test clean install lint
+.PHONY: build test cover vet lint sec audit clean
 
 build:
-	go build -o $(BINARY) ./cmd/sin-websearch
+	go build ./cmd/sin-websearch
 
 test:
 	go test ./...
 
+cover:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out
+
+vet:
+	go vet ./...
+
 lint:
-	gofmt -w .
+	golangci-lint run ./... --timeout=5m
+
+sec:
+	gosec ./...
+	govulncheck ./...
+
+audit:
+	bash ~/.config/opencode/skills/ceo-audit/scripts/audit.sh .
 
 clean:
-	rm -f $(BINARY)
-
-install:
-	go install ./cmd/sin-websearch
+	rm -f coverage.out sin-websearch

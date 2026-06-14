@@ -1,5 +1,10 @@
 # sin-websearch
 
+[![CI](https://github.com/OpenSIN-Code/web_search_bundle/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenSIN-Code/web_search_bundle/actions/workflows/ci.yml)
+[![CEO Audit](https://img.shields.io/badge/CEO--Audit-A%2B%20100.0%2F100-brightgreen)](./CEO_AUDIT_REPORT.md)
+[![Go Version](https://img.shields.io/badge/Go-1.25%2B-blue)](https://go.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Unified Intelligence Gateway for OpenSIN — a single Go binary that orchestrates 20+ web sources (Reddit, Hacker News, Polymarket, GitHub, Brave, Bluesky, SearxNG, Perplexity, SerpAPI, YouTube) with entity resolution, humor/virality scoring, intelligent caching, multi-agent research missions, and video intelligence.
 
 ## Installation

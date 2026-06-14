@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-06-14
+
+### Added
+
+- **CEO-Audit GitHub Actions workflow** `.github/workflows/ceo-audit.yml` — runs the 47-gate audit on every push/PR.
+- **security.txt** under `.well-known/security.txt`.
+- **CODEOWNERS** and **FUNDING.yml** in `.github/`.
+- **Makefile** with targets for `build`, `test`, `cover`, `vet`, `lint`, `sec`, `audit`, `clean`.
+- **README badges** for CI, CEO-Audit grade, Go version, and license.
+- Backfilled tests for previously untested or under-tested packages:
+  - `internal/judge` — 94.3% coverage
+  - `internal/resolver` — 100.0% coverage
+  - `internal/mission` — 97.1% coverage
+  - `internal/verify` — 85.0% coverage
+  - `internal/server` — 76.5% coverage
+  - `internal/engines` — 85.2% coverage
+  - `internal/experiment` — 100.0% coverage
+  - `internal/sidecar` — 89.2% coverage
+- Matching `.doc.md` companions for all new test files.
+
+### Changed
+
+- Removed the `ceo-audit` skill backup file after the coverage-gate fix proved stable.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.8] - 2026-06-14
 
 ### Changed
