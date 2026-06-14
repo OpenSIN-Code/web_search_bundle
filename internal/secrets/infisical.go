@@ -67,11 +67,11 @@ func (c *InfisicalClient) loadFromInfisical(names []string) []string {
 }
 
 func (c *InfisicalClient) getSecret(name string) string {
-	if _, err := exec.LookPath("infisical"); err != nil {
-		return ""
-	}
 	if val := os.Getenv(name); val != "" {
 		return val
+	}
+	if _, err := exec.LookPath("infisical"); err != nil {
+		return ""
 	}
 	cmd := exec.Command("infisical", "secrets", "get", name, // #nosec G204 — infisical CLI is a fixed binary
 		"--projectId="+c.projectID, "--env="+c.env, "--plain", "--silent")

@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-06-14
+
+### Added
+
+- Full CEO-Audit report (`CEO_AUDIT_REPORT.md`) — grade **A (90.8/100)**.
+- Backfilled tests for previously untested packages:
+  - `internal/engines` — engine helpers, video parsing, transcription
+  - `internal/briefing` — HTML briefing generation
+  - `internal/cache` — cache set/get/expiration
+  - `internal/config` — config loading and key parsing
+  - `internal/session` — browser session extraction helpers
+  - `internal/sidecar` — sidecar manager and binary lifecycle
+  - `internal/secrets` — Infisical client and secret loading
+  - `internal/profiles` — profile registry, loading, and defaults
+- More benchmarks:
+  - `internal/judge/humor_bench_test.go`
+  - `internal/mission/orchestrator_bench_test.go`
+  - `internal/orchestrator/orchestrator_bench_test.go`
+  - `internal/config/config_bench_test.go`
+
+### Fixed
+
+- `internal/secrets/infisical.go`: `getSecret()` now checks environment variables **before** falling back to the Infisical CLI, so the secret loader works when the CLI is not installed.
+- `internal/engines/engines_test.go`: replaced `nil` context with `context.TODO()` to satisfy `staticcheck` `SA1012`.
+
+### CI / Tooling
+
+- `golangci-lint` now runs locally and passes with **0 findings**.
+- `gosec` and `govulncheck` continue to report **0 findings/vulnerabilities**.
+
 ## [0.2.3] - 2026-06-14
 
 ### Changed
