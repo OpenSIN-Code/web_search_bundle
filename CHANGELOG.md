@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-06-14
+
+### Added
+
+- HTTP API authentication: optional bearer-token middleware (`Authorization: Bearer <token>`) protecting all `/api/v1/*` endpoints. Configured via `token` in YAML or `SIN_WEBSEARCH_TOKEN` env var.
+- New `SECURITY.md` with supported versions, vulnerability reporting, and security best practices.
+- Split `internal/server/http.go` into smaller files:
+  - `auth.go` — bearer-token middleware
+  - `handlers.go` — search/pulse/resolve/stream handlers
+  - `alchemist.go` — alchemist and swarm handlers
+  - `video.go` — watch/vbrief/vprompt handlers
+- Split `cmd/sin-websearch/alchemist_cmd.go` into per-subcommand files:
+  - `alchemist_run_cmd.go`
+  - `alchemist_swarm_cmd.go`
+  - `alchemist_report_cmd.go`
+  - `alchemist_history_cmd.go`
+  - `alchemist_init_cmd.go`
+  - `alchemist_template.go`
+- Backfilled tests for previously untested packages:
+  - `internal/imaging` — image resize and batch resize
+  - `internal/prompts` — video prompt builder, presets, token estimation
+  - `internal/mcp` — parameter validation and handler helpers
+  - `internal/orchestrator` — orchestrator search, cache, stream, pulse, errors
+  - `internal/server` — auth middleware
+- More benchmarks:
+  - `internal/imaging/resize_bench_test.go`
+  - `internal/prompts/video_bench_test.go`
+  - `internal/server/server_bench_test.go`
+  - `internal/profiles/profile_bench_test.go`
+- 58 additional `.doc.md` companion files to complete the CoDocs layer for every Go file.
+
+### Changed
+
+- Updated all dependencies to their latest versions; `go.mod` now requires **Go 1.25**.
+- CI matrix updated to test Go **1.25** and **1.26**.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.4] - 2026-06-14
 
 ### Added

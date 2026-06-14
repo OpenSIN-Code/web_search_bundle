@@ -20,6 +20,7 @@ type Config struct {
 	CachePath         string            `mapstructure:"cache_path"`
 	HTTPPort          int               `mapstructure:"http_port"`
 	MCPPort           int               `mapstructure:"mcp_port"`
+	Token             string            `mapstructure:"token"`
 	SearxNGURLs       []string          `mapstructure:"searxng_urls"`
 	Defaults          map[string]string `mapstructure:"defaults"`
 }
@@ -73,6 +74,9 @@ func Load() (*Config, error) {
 	}
 	if cfg.OpenAIAPIKey == "" {
 		cfg.OpenAIAPIKey = os.Getenv("OPENAI_API_KEY")
+	}
+	if cfg.Token == "" {
+		cfg.Token = os.Getenv("SIN_WEBSEARCH_TOKEN")
 	}
 
 	return &cfg, nil

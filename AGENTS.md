@@ -32,7 +32,7 @@
 
 ## Build & Test
 
-Requires Go 1.24+. CI tests Go 1.24 and 1.25.
+Requires Go 1.25+. CI tests Go 1.25 and 1.26.
 
 ```bash
 go mod tidy

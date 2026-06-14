@@ -30,4 +30,5 @@ vendor/
 *.log
 *.db
 /train.py
+**/train.py
 gosec_report.json
