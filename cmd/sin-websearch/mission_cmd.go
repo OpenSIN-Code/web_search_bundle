@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Mission command for multi-agent research.
 // Docs: cmd/sin-websearch/mission_cmd.doc.md
 package main

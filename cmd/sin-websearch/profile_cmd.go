@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Profile command to list and inspect research profiles.
 // Docs: cmd/sin-websearch/profile_cmd.doc.md
 package main

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for the SQLite cache.
 // Docs: cache_test.doc.md
 

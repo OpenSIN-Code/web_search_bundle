@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Resolve command for entity resolution.
 // Docs: cmd/sin-websearch/resolve_cmd.doc.md
 package main

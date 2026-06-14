@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for the key pool.
 // Docs: internal/pool/keypool_test.doc.md
 package pool

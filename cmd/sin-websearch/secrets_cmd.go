@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Secrets command for Infisical and env-based secret loading.
 // Docs: cmd/sin-websearch/secrets_cmd.doc.md
 package main

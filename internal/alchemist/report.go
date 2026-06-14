@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Format and generate morning markdown reports of research runs.
 // Docs: report.doc.md
 

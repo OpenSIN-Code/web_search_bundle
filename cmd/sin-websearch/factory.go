@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Factory wiring engines and orchestrator for CLI commands.
 // Docs: cmd/sin-websearch/factory.doc.md
 package main

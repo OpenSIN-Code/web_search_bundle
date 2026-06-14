@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: SerpAPI search engine with rotating key pool.
 // Docs: internal/engines/serpapi.doc.md
 package engines

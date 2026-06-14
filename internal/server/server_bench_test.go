@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark HTTP server hot paths without external network calls.
 // Docs: handlers.doc.md
 package server

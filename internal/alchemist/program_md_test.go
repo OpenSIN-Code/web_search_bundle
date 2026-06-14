@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Smoke tests for the ProgramMD parser.
 // Docs: program_md_test.doc.md
 

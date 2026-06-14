@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Refresh hypotheses from sin-websearch literature scans.
 // Docs: literature.doc.md
 

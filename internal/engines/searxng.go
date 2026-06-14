@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: SearxNG proxy engine for privacy-focused search.
 // Docs: internal/engines/searxng.doc.md
 package engines

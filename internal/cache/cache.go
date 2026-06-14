@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: SQLite-based cache for search queries and video analysis results.
 // Docs: internal/cache/cache.doc.md
 package cache

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark claim extraction and verification pipeline.
 // Docs: claim.doc.md
 package verify

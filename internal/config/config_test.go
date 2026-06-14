@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for configuration loading.
 // Docs: config_test.doc.md
 

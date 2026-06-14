@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Score results for relevance, virality, and humor.
 // Docs: internal/judge/humor.doc.md
 package judge

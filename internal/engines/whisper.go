@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Whisper transcription via Groq or OpenAI.
 // Docs: internal/engines/whisper.doc.md
 package engines

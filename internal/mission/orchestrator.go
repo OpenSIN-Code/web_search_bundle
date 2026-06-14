@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Multi-agent research missions with explore and librarian agents.
 // Docs: internal/mission/orchestrator.doc.md
 package mission

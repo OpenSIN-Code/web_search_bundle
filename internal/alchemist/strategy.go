@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Define strategies for Swarm workers.
 // Docs: strategy.doc.md
 

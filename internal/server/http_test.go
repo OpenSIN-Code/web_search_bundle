@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Tests for the HTTP REST API server.
 // Docs: http_test.doc.md
 

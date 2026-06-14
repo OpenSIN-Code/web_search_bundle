@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: HTTP REST API server wiring and lifecycle.
 // Docs: internal/server/http.doc.md
 package server

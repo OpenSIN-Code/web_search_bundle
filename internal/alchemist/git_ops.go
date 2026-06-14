@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Implement Git operations for Alchemist.
 // Docs: git_ops.doc.md
 

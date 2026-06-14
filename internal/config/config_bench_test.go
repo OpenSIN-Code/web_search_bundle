@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark configuration loading and helper functions.
 // Docs: internal/config/config.doc.md
 package config

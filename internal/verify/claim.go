@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Citation discipline configuration for verification.
 // Docs: internal/verify/claim.doc.md
 package verify

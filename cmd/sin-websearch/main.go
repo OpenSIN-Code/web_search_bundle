@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Entry point for the sin-websearch CLI.
 // Docs: cmd/sin-websearch/main.doc.md
 package main

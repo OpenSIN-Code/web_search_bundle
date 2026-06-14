@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark key pool rotation and active-key counting.
 // Docs: keypool.doc.md
 package pool

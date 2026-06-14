@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark entity resolution and query expansion.
 // Docs: entity.doc.md
 package resolver

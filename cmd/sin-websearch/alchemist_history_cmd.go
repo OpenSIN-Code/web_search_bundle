@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command to list alchemist experiment history.
 // Docs: alchemist_history_cmd.doc.md
 package main

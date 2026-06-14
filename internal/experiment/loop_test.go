@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for experiment loop logic.
 // Docs: loop_test.doc.md
 

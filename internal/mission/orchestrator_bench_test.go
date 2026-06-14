@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark multi-agent mission orchestration hot paths.
 // Docs: internal/mission/orchestrator.doc.md
 package mission

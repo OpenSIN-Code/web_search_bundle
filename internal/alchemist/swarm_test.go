@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Smoke tests for the Swarm multi-strategy coordinator.
 // Docs: swarm_test.doc.md
 

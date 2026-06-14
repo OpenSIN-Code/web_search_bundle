@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for HTTP-based search engines using httptest.
 // Docs: search_engines_test.doc.md
 

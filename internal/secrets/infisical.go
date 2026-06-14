@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Load secrets from Infisical CLI or environment variables.
 // Docs: internal/secrets/infisical.doc.md
 package secrets

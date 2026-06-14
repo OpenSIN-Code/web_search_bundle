@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for the fan-out orchestrator.
 // Docs: internal/orchestrator/orchestrator_test.doc.md
 package orchestrator

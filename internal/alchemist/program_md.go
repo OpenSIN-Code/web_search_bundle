@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Parse and update program.md research plans.
 // Docs: program_md.doc.md
 

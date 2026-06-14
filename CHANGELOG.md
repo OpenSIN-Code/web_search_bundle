@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-06-14
+
+### Added
+
+- `sbom.spdx.json` and `bom.json` (CycloneDX) — generated SBOMs for supply-chain transparency.
+- MIT `SPDX-License-Identifier` header added to every `.go` source file.
+
+### Changed
+
+- Reran CEO-Audit after v0.2.5 release: grade improved from **A+ 99.0/100** to **A+ 99.2/100**.
+- Updated additional indirect dependencies (`modernc.org/libc` and others).
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.5] - 2026-06-14
 
 ### Added

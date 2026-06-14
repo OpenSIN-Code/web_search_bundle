@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Deep multimodal video analysis (frames + transcript).
 // Docs: internal/engines/video.doc.md
 package engines

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: GitHub REST search engine for repositories, issues, and users.
 // Docs: internal/engines/github.doc.md
 package engines

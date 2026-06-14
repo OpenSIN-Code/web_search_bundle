@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Smoke tests for alchemist strategies.
 // Docs: strategy_test.doc.md
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Resize extracted video frames using pure Go image processing.
 // Docs: internal/imaging/resize.doc.md
 package imaging

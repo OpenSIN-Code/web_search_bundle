@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Brave Search API engine.
 // Docs: internal/engines/brave.doc.md
 package engines

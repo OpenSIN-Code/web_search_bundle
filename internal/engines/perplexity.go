@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Perplexity via OpenRouter API engine.
 // Docs: internal/engines/perplexity.doc.md
 package engines

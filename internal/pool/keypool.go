@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Rotate a pool of API keys with basic rate-limit handling.
 // Docs: internal/pool/keypool.doc.md
 package pool

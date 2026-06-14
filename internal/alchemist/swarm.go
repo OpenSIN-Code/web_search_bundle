@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Coordinate multi-strategy parallel Alchemist workers.
 // Docs: swarm.doc.md
 

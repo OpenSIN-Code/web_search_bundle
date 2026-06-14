@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for research profile loading and registry.
 // Docs: profile_test.doc.md
 package profiles

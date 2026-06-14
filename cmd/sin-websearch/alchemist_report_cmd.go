@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command to show the alchemist report from the last run.
 // Docs: alchemist_report_cmd.doc.md
 package main

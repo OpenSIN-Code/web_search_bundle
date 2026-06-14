@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command registration for alchemist subcommands.
 // Docs: alchemist_cmd.doc.md
 package main

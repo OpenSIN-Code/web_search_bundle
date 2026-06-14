@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hacker News Algolia search engine.
 // Docs: internal/engines/hackernews.doc.md
 package engines

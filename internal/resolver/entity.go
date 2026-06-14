@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Entity resolution: topic → handles, repos, subreddits, hashtags.
 // Docs: internal/resolver/entity.doc.md
 package resolver

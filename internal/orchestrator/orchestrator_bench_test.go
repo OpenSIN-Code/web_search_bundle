@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark the fan-out search orchestrator hot paths.
 // Docs: internal/orchestrator/orchestrator.doc.md
 package orchestrator

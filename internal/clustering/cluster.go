@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Merge duplicate or overlapping stories across sources.
 // Docs: internal/clustering/cluster.doc.md
 package clustering

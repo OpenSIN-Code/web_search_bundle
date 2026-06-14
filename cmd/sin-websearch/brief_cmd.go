@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Brief command to generate a research summary.
 // Docs: cmd/sin-websearch/brief_cmd.doc.md
 package main

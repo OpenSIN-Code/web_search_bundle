@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command to run a single alchemist autonomous loop.
 // Docs: alchemist_run_cmd.doc.md
 package main

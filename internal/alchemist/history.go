@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: SQLite persistent storage for Alchemist experiment runs.
 // Docs: history.doc.md
 

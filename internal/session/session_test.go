@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for browser session extraction.
 // Docs: session_test.doc.md
 

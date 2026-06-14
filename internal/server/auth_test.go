@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Tests for HTTP API authentication middleware.
 // Docs: auth_test.doc.md
 package server

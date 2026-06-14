@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command to run a multi-strategy alchemist swarm.
 // Docs: alchemist_swarm_cmd.doc.md
 package main

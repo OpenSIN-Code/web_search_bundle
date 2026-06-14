@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Manage optional external binaries (yt-dlp, scrapecreators, ffmpeg).
 // Docs: internal/sidecar/manager.doc.md
 package sidecar

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Generate self-contained HTML briefings with embedded video frames.
 // Docs: internal/briefing/video_html.doc.md
 package briefing

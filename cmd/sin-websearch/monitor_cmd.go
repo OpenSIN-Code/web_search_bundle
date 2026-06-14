@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Monitor command for recurring topic tracking.
 // Docs: cmd/sin-websearch/monitor_cmd.doc.md
 package main

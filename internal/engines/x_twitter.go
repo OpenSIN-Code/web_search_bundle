@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: X/Twitter search engine using browser session cookies.
 // Docs: internal/engines/x_twitter.doc.md
 package engines

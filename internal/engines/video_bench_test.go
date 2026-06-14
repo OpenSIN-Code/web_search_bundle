@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark video subtitle parsing and HTML stripping.
 // Docs: video.doc.md
 package engines

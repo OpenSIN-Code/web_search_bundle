@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Research profile definitions for multi-agent missions.
 // Docs: internal/profiles/profile.doc.md
 package profiles

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: HTTP handlers for video analysis, briefing, and vision prompts.
 // Docs: video_handler.doc.md
 package server

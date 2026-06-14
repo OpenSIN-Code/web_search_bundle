@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Search command for multi-source web search.
 // Docs: cmd/sin-websearch/search_cmd.doc.md
 package main

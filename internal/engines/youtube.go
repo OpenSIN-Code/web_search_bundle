@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: YouTube search via yt-dlp sidecar for metadata and transcripts.
 // Docs: internal/engines/youtube.doc.md
 package engines

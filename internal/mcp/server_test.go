@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Tests for the MCP server tool handlers.
 // Docs: server_test.doc.md
 

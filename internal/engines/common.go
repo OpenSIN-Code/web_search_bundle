@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Shared types and interfaces for all search engines.
 // Docs: internal/engines/common.doc.md
 package engines

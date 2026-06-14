@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for video briefing HTML generation.
 // Docs: briefing_test.doc.md
 

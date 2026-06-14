@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Default program.md templates for alchemist init.
 // Docs: alchemist_template.doc.md
 package main

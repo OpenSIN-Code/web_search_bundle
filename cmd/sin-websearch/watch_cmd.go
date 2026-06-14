@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Watch command for multimodal video analysis.
 // Docs: cmd/sin-websearch/watch_cmd.doc.md
 package main

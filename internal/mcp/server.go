@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: MCP server exposing sin-websearch tools to sin-code and other agents.
 // Docs: internal/mcp/server.doc.md
 package mcp

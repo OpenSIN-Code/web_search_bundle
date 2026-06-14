@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: API-key/token authentication middleware for the HTTP API.
 // Docs: auth.doc.md
 package server

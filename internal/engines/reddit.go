@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Reddit JSON search engine (no API key required).
 // Docs: internal/engines/reddit.doc.md
 package engines

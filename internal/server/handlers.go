@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: HTTP handlers for search, pulse, resolve and streaming endpoints.
 // Docs: handlers.doc.md
 package server

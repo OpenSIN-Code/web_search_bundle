@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Additional unit tests for MCP server helpers and error paths.
 // Docs: internal/mcp/server_extra_test.doc.md
 package mcp

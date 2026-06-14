@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Implement Karpathy-style fixed-budget autonomous research loop.
 // Docs: loop.doc.md
 

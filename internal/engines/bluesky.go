@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Bluesky AT Protocol search engine.
 // Docs: internal/engines/bluesky.doc.md
 package engines

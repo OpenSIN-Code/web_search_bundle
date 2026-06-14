@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Extract claims from search results for verification.
 // Docs: internal/verify/extractor.doc.md
 package verify

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Vision-LLM prompt templates for video analysis.
 // Docs: internal/prompts/video.doc.md
 package prompts

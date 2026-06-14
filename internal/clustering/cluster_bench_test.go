@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark cluster grouping and Jaccard similarity.
 // Docs: cluster.doc.md
 package clustering

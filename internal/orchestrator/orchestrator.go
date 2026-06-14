@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Parallel fan-out orchestrator across all search engines.
 // Docs: internal/orchestrator/orchestrator.doc.md
 package orchestrator

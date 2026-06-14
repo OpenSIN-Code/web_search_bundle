@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Hermetic unit tests for the sidecar manager.
 // Docs: sidecar_test.doc.md
 

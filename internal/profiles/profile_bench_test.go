@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark profile YAML parsing, registry creation, and lookups.
 // Docs: profile.doc.md
 package profiles

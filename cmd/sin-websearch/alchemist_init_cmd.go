@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: CLI command to initialize a program.md template.
 // Docs: alchemist_init_cmd.doc.md
 package main

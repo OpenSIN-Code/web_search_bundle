@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Central configuration management for sin-websearch.
 // Docs: internal/config/config.doc.md
 package config

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: HTTP handlers for alchemist and swarm endpoints.
 // Docs: alchemist_handler.doc.md
 package server

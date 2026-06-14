@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Implement the autonomous research daemon loop.
 // Docs: daemon.doc.md
 

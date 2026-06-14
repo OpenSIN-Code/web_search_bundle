@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark video prompt construction for Vision-LLM requests.
 // Docs: video.doc.md
 package prompts

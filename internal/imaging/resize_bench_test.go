@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark image resizing and batch resizing hot paths.
 // Docs: resize.doc.md
 package imaging

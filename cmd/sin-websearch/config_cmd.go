@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Config command to inspect and initialize configuration.
 // Docs: cmd/sin-websearch/config_cmd.doc.md
 package main

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Smoke tests for the LiteratureLoader hypothesis refresh.
 // Docs: literature_test.doc.md
 

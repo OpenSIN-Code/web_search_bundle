@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Pulse command for social sentiment search.
 // Docs: cmd/sin-websearch/pulse_cmd.doc.md
 package main

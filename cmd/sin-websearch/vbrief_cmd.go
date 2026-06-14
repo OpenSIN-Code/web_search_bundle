@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Video briefing command that generates offline HTML reports.
 // Docs: cmd/sin-websearch/vbrief_cmd.doc.md
 package main

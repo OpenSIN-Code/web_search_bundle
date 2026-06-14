@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Serve command to start the MCP server.
 // Docs: cmd/sin-websearch/serve_cmd.doc.md
 package main

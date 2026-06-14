@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for image resizing helpers.
 // Docs: internal/imaging/resize_test.doc.md
 package imaging

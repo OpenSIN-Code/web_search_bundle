@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Benchmark humor/virality scoring and best-takes selection.
 // Docs: internal/judge/humor.doc.md
 package judge

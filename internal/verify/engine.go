@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Run verification pipeline on search results.
 // Docs: internal/verify/engine.doc.md
 package verify

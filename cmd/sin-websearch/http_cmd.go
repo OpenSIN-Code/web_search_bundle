@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: HTTP command to start the REST API server.
 // Docs: cmd/sin-websearch/http_cmd.doc.md
 package main

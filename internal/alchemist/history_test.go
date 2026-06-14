@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Smoke tests for the SQLite history store.
 // Docs: history_test.doc.md
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Extract browser cookies for authenticated sessions (X/Twitter, etc.).
 // Docs: internal/session/browser.doc.md
 package session

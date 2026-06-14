@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Polymarket CLOB API search engine.
 // Docs: internal/engines/polymarket.doc.md
 package engines

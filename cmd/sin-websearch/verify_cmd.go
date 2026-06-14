@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Verify command for claim verification.
 // Docs: cmd/sin-websearch/verify_cmd.doc.md
 package main

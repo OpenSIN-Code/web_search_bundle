@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for video prompt builders.
 // Docs: internal/prompts/video_test.doc.md
 package prompts

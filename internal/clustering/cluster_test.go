@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Purpose: Unit tests for the clustering package.
 // Docs: internal/clustering/cluster_test.doc.md
 package clustering
