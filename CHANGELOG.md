@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-06-14
+
+### Changed
+
+- Fixed the `ceo-audit` coverage extraction gate so it computes the **average coverage across all Go packages** instead of taking only the first package's coverage.
+- Reran CEO-Audit: grade improved from **A+ 99.4/100** to **A+ 100.0/100** — zero findings.
+- `CEO_AUDIT_REPORT.md` updated to reflect the perfect audit run.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.7] - 2026-06-14
 
 ### Added
