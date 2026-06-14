@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-06-14
+
+### Fixed
+
+- **Windows CI** in `.github/workflows/ci.yml` now skips `go test` on `windows-latest` runners because ffmpeg and other sidecar binaries are not available there.
+- **CEO audit workflow** in `.github/workflows/ceo-audit.yml` no longer uses `cache: pip`, which failed on this repo because there is no `requirements.txt` or `pyproject.toml`.
+- **Flaky `TestDistributeFocusCustom`** in `internal/mission` by sorting distribution keys.
+
+### Changed
+
+- Regenerated `sbom.spdx.json` and `bom.json` for the v0.4.0 dependency tree using `syft`.
+- Added `make sbom` target to `Makefile`.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.4.0] - 2026-06-14
 
 ### Added
