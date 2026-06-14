@@ -105,7 +105,7 @@ searxng_urls:
 - **Alchemist autoresearch**: Karpathy-style optimization loops with git safety
 - **Swarm-Alchemist**: multi-strategy parallel research with winner selection
 - **Literature-Loader**: periodic sin-websearch refresh of hypotheses
-- **MCP server**: integrate with sin-code, Claude, Cursor, etc.
+- **MCP server**: integrate with [SIN-Code](https://github.com/OpenSIN-Code/SIN-Code), Claude, Cursor, etc.
 - **HTTP REST API**: any app can call it
 - **Infisical secrets**: load keys from Infisical CLI
 

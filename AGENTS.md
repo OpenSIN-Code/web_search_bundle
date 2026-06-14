@@ -21,7 +21,7 @@
 - `internal/mission/` — multi-agent research missions
 - `internal/verify/` — claim verification with citation discipline
 - `internal/profiles/` — research mission profiles
-- `internal/mcp/` — MCP server for agent integration
+- `internal/mcp/` — MCP server for agent integration (consumed by SIN-Code as the `websearch` ecosystem skill)
 - `internal/server/` — HTTP REST API
 - `internal/secrets/` — Infisical / env secret loading
 - `internal/config/` — Viper-based configuration
