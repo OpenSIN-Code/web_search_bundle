@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/OpenSIN-Code/web_search_bundle/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenSIN-Code/web_search_bundle/actions/workflows/ci.yml)
 [![CEO Audit](https://img.shields.io/badge/CEO--Audit-A%2B%20100.0%2F100-brightgreen)](./CEO_AUDIT_REPORT.md)
+[![Release](https://img.shields.io/github/v/release/OpenSIN-Code/web_search_bundle)](https://github.com/OpenSIN-Code/web_search_bundle/releases)
 [![Go Version](https://img.shields.io/badge/Go-1.25%2B-blue)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -67,13 +68,26 @@ curl -X POST http://localhost:8787/api/v1/watch \
 # HTTP API: video briefing
 curl -X POST http://localhost:8787/api/v1/vbrief \
   -H 'Content-Type: application/json' \
-  -d '{"url":"https://youtu.be/dQw4w9YgXcQ","preset":"tutorial"}'
+  -d '{"url":"https://youtu.be/dQw4w9WgXcQ","preset":"tutorial"}'
 
 # HTTP API: vision prompt
 curl -X POST http://localhost:8787/api/v1/vprompt \
   -H 'Content-Type: application/json' \
-  -d '{"url":"https://youtu.be/dQw4w9YgXcQ","prompt":"Describe the key visual moments"}'
+  -d '{"url":"https://youtu.be/dQw4w9WgXcQ","prompt":"Describe the key visual moments"}'
 ```
+
+## SIN-Code Integration
+
+`sin-websearch` is the official Go-native websearch skill for [SIN-Code](https://github.com/OpenSIN-Code/SIN-Code). It exposes the same tools as the deprecated Python skill (`websearch_search`, `websearch_pulse`, `websearch_resolve`, `websearch_watch`, `websearch_video_brief`, `websearch_video_prompt`, `websearch_alchemist`) via the MCP server.
+
+Install the skill from SIN-Code:
+
+```bash
+sin-code skill install websearch
+sin-code mcp list   # should show: websearch  stdio  <SIN_SKILLS_DIR>/web_search_bundle/sin-websearch serve
+```
+
+This clones `web_search_bundle`, builds the `sin-websearch` binary, and registers it with SIN-Code. No manual PATH setup or `go install` is required.
 
 ## Configuration
 
@@ -114,7 +128,7 @@ searxng_urls:
 - **CEO-Audit**: A+ 100.0/100 — see `CEO_AUDIT_REPORT.md`
 - **Vulnerabilities**: `govulncheck` reports 0
 - **Static analysis**: `gosec` and `golangci-lint` report 0 findings
-- **CI/CD**: GitHub Actions run `ci.yml` (build/test/vet) and `ceo-audit.yml` (47-gate audit) on every push/PR
+- **CI/CD**: GitHub Actions run `ci.yml` (build/test/vet), `ceo-audit.yml` (47-gate audit), and `release.yml` (cross-platform binaries) on every push/PR/tag
 - **SBOM**: `sbom.spdx.json` (SPDX) and `bom.json` (CycloneDX)
 - **Security policy**: see `SECURITY.md` and `.well-known/security.txt`
 
