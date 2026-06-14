@@ -7,6 +7,7 @@ Common development tasks for the `sin-websearch` project.
 - `make lint` — run `golangci-lint`
 - `make sec` — run `gosec` and `govulncheck`
 - `make audit` — run the CEO Audit
+- `make sbom` — regenerate `sbom.spdx.json` and `bom.json` with syft
 - `make clean` — remove generated artifacts
 
 Related files: `Makefile`, `AGENTS.md`, `SECURITY.md`.

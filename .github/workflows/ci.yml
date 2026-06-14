@@ -31,6 +31,8 @@ jobs:
         run: go build ./cmd/sin-websearch
 
       - name: Test
+        # Windows runners lack ffmpeg and other sidecar binaries; build+vet only there.
+        if: matrix.os != 'windows-latest'
         run: go test ./...
 
       - name: Vet

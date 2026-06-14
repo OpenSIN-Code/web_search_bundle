@@ -26,5 +26,8 @@ sec:
 audit:
 	bash ~/.config/opencode/skills/ceo-audit/scripts/audit.sh .
 
+sbom:
+	syft scan dir:. -o spdx-json=sbom.spdx.json -o cyclonedx-json=bom.json
+
 clean:
 	rm -f coverage.out sin-websearch
