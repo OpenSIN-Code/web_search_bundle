@@ -10,12 +10,15 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/OpenSIN-Code/web_search_bundle/internal/config"
 )
 
 func (s *HTTPServer) handleHealth(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"status":    "ok",
-		"timestamp": time.Now().UTC(),
+		"status":  "ok",
+		"uptime":  time.Since(s.startedAt).Round(time.Second).String(),
+		"version": config.Version,
 	})
 }
 

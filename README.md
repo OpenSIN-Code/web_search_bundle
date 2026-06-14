@@ -14,6 +14,21 @@ Unified Intelligence Gateway for OpenSIN — a single Go binary that orchestrate
 go install github.com/OpenSIN-Code/web_search_bundle/cmd/sin-websearch@latest
 ```
 
+## Homebrew
+
+Install the latest release binary directly from the formula:
+
+```bash
+brew install --formula https://raw.githubusercontent.com/OpenSIN-Code/web_search_bundle/main/scripts/homebrew/sin-websearch.rb
+```
+
+Or tap the repository and install from the local formula path:
+
+```bash
+brew tap OpenSIN-Code/web_search_bundle https://github.com/OpenSIN-Code/web_search_bundle
+brew install --formula "$(brew --repo OpenSIN-Code/web_search_bundle)/scripts/homebrew/sin-websearch.rb"
+```
+
 ## Quick Start
 
 ```bash
@@ -145,6 +160,10 @@ make lint     # golangci-lint
 make sec      # gosec + govulncheck
 make audit    # CEO-Audit
 ```
+
+## Deployment
+
+See [docs/deployment.md](docs/deployment.md) for TLS, reverse proxy, systemd, and Docker guidance.
 
 ## Documentation
 

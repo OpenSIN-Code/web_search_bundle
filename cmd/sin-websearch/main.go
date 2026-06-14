@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/OpenSIN-Code/web_search_bundle/internal/config"
 	"github.com/spf13/cobra"
 )
 
 var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	commit = "none"
+	date   = "unknown"
 )
 
 func main() {
@@ -28,8 +28,8 @@ Designed as the native research backend for sin-code and any app via HTTP API.
 
 Version: %s
 Commit:  %s
-Built:   %s`, version, commit, date),
-		Version: version,
+Built:   %s`, config.Version, commit, date),
+		Version: config.Version,
 	}
 
 	rootCmd.AddCommand(newSearchCmd())

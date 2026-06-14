@@ -10,22 +10,28 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Version is the current build version of sin-websearch. It is set at build
+// time via ldflags (e.g. -X config.Version=1.2.3) and exposed by the /health
+// endpoint.
+var Version = "dev"
+
 // Config holds the parsed application configuration.
 type Config struct {
-	SerpAPIKeys       []string          `mapstructure:"serpapi_keys"`
-	BraveAPIKey       string            `mapstructure:"brave_api_key"`
-	OpenRouterKey     string            `mapstructure:"openrouter_api_key"`
-	ScrapeCreatorsKey string            `mapstructure:"scrapecreators_api_key"`
-	GroqAPIKey        string            `mapstructure:"groq_api_key"`
-	OpenAIAPIKey      string            `mapstructure:"openai_api_key"`
-	CachePath         string            `mapstructure:"cache_path"`
-	HTTPPort          int               `mapstructure:"http_port"`
-	MCPPort           int               `mapstructure:"mcp_port"`
-	Token             string            `mapstructure:"token"`
-	SearxNGURLs       []string          `mapstructure:"searxng_urls"`
-	Defaults          map[string]string `mapstructure:"defaults"`
-	RateLimitRPS      float64           `mapstructure:"rate_limit_rps"`
-	RateLimitBurst    int               `mapstructure:"rate_limit_burst"`
+	SerpAPIKeys           []string          `mapstructure:"serpapi_keys"`
+	BraveAPIKey           string            `mapstructure:"brave_api_key"`
+	OpenRouterKey         string            `mapstructure:"openrouter_api_key"`
+	ScrapeCreatorsKey     string            `mapstructure:"scrapecreators_api_key"`
+	GroqAPIKey            string            `mapstructure:"groq_api_key"`
+	OpenAIAPIKey          string            `mapstructure:"openai_api_key"`
+	CachePath             string            `mapstructure:"cache_path"`
+	HTTPPort              int               `mapstructure:"http_port"`
+	MCPPort               int               `mapstructure:"mcp_port"`
+	Token                 string            `mapstructure:"token"`
+	SearxNGURLs           []string          `mapstructure:"searxng_urls"`
+	Defaults              map[string]string `mapstructure:"defaults"`
+	RateLimitRPS          float64           `mapstructure:"rate_limit_rps"`
+	RateLimitBurst        int               `mapstructure:"rate_limit_burst"`
+	DisableRequestLogging bool              `mapstructure:"disable_request_logging"`
 }
 
 // Load reads the configuration from the default paths and environment variables.
@@ -50,6 +56,7 @@ func Load() (*Config, error) {
 	v.SetDefault("defaults", map[string]string{})
 	v.SetDefault("rate_limit_rps", 10.0)
 	v.SetDefault("rate_limit_burst", 20)
+	v.SetDefault("disable_request_logging", false)
 
 	v.SetEnvPrefix("SIN_WEBSEARCH")
 	v.AutomaticEnv()

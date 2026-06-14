@@ -8,9 +8,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: test (${{ matrix.os }}, go ${{ matrix.go-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         go-version: ["1.25", "1.26"]
 
     steps:
@@ -32,6 +35,24 @@ jobs:
 
       - name: Vet
         run: go vet ./...
+
+  install:
+    name: install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test install.sh
+        shell: bash
+        run: |
+          INSTALL_DIR=$(mktemp -d)
+          ./install.sh --dir "${INSTALL_DIR}"
+          "${INSTALL_DIR}/sin-websearch" --help
 
   lint:
     runs-on: ubuntu-latest

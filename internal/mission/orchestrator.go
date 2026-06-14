@@ -6,6 +6,7 @@ package mission
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -174,6 +175,8 @@ func distributeFocus(n int, dist map[string]float64) []string {
 	for k := range dist {
 		keys = append(keys, k)
 	}
+	// Sort keys for deterministic distribution regardless of map iteration order.
+	sort.Strings(keys)
 	for i := 0; i < n; i++ {
 		foci[i] = keys[i%len(keys)]
 	}

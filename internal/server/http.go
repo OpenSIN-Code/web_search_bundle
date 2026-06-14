@@ -6,7 +6,9 @@ package server
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/OpenSIN-Code/web_search_bundle/internal/config"
@@ -20,6 +22,9 @@ type HTTPServer struct {
 	orchestrator *orchestrator.Orchestrator
 	resolver     *resolver.EntityResolver
 	server       *http.Server
+	metrics      *metricsCollector
+	logger       *slog.Logger
+	startedAt    time.Time
 }
 
 // NewHTTPServer creates a new HTTP server.
@@ -28,26 +33,39 @@ func NewHTTPServer(cfg *config.Config, orch *orchestrator.Orchestrator) *HTTPSer
 		cfg:          cfg,
 		orchestrator: orch,
 		resolver:     resolver.NewEntityResolver(),
+		metrics:      newMetricsCollector(),
+		logger:       slog.New(slog.NewTextHandler(os.Stdout, nil)),
+		startedAt:    time.Now(),
 	}
+}
+
+// Handler returns the fully wired HTTP handler for the server. It is used by
+// Start() and by tests that want to exercise routing/middleware without opening
+// a real TCP listener.
+func (s *HTTPServer) Handler() http.Handler {
+	mux := http.NewServeMux()
+	obs := s.observe
+
+	mux.HandleFunc("/health", obs(s.handleHealth))
+	mux.HandleFunc("/metrics", obs(s.handleMetrics))
+
+	// Rate limit all mutating/expensive API endpoints per client IP.
+	rl := s.newRateLimiter()
+	mux.HandleFunc("/api/v1/search", obs(rl(s.authMiddleware(s.handleSearch))))
+	mux.HandleFunc("/api/v1/search/stream", obs(rl(s.authMiddleware(s.handleSearchStream))))
+	mux.HandleFunc("/api/v1/pulse", obs(rl(s.authMiddleware(s.handlePulse))))
+	mux.HandleFunc("/api/v1/resolve", obs(rl(s.authMiddleware(s.handleResolve))))
+	mux.HandleFunc("/api/v1/alchemist", obs(rl(s.authMiddleware(s.handleAlchemist))))
+	mux.HandleFunc("/api/v1/alchemist/swarm", obs(rl(s.authMiddleware(s.handleAlchemistSwarm))))
+	mux.HandleFunc("/api/v1/watch", obs(rl(s.authMiddleware(s.handleWatch))))
+	mux.HandleFunc("/api/v1/vbrief", obs(rl(s.authMiddleware(s.handleVideoBrief))))
+	mux.HandleFunc("/api/v1/vprompt", obs(rl(s.authMiddleware(s.handleVideoPrompt))))
+
+	return mux
 }
 
 // Start runs the HTTP server.
 func (s *HTTPServer) Start() error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", s.handleHealth)
-
-	// Rate limit all mutating/expensive API endpoints per client IP.
-	rl := s.newRateLimiter()
-	mux.HandleFunc("/api/v1/search", rl(s.authMiddleware(s.handleSearch)))
-	mux.HandleFunc("/api/v1/search/stream", rl(s.authMiddleware(s.handleSearchStream)))
-	mux.HandleFunc("/api/v1/pulse", rl(s.authMiddleware(s.handlePulse)))
-	mux.HandleFunc("/api/v1/resolve", rl(s.authMiddleware(s.handleResolve)))
-	mux.HandleFunc("/api/v1/alchemist", rl(s.authMiddleware(s.handleAlchemist)))
-	mux.HandleFunc("/api/v1/alchemist/swarm", rl(s.authMiddleware(s.handleAlchemistSwarm)))
-	mux.HandleFunc("/api/v1/watch", rl(s.authMiddleware(s.handleWatch)))
-	mux.HandleFunc("/api/v1/vbrief", rl(s.authMiddleware(s.handleVideoBrief)))
-	mux.HandleFunc("/api/v1/vprompt", rl(s.authMiddleware(s.handleVideoPrompt)))
-
 	port := 8787
 	if s.cfg != nil && s.cfg.HTTPPort != 0 {
 		port = s.cfg.HTTPPort
@@ -55,7 +73,7 @@ func (s *HTTPServer) Start() error {
 
 	s.server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
-		Handler:      mux,
+		Handler:      s.Handler(),
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 120 * time.Second,
 		IdleTimeout:  60 * time.Second,

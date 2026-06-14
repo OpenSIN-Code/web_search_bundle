@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-14
+
+### Added
+
+- **Prometheus-style `/metrics` endpoint** for the HTTP API with `http_requests_total` and `http_request_duration_seconds`.
+- **Request logging middleware** via `log/slog` with method, path, status, duration, and client IP; configurable via `disable_request_logging`.
+- **Enhanced `/health` endpoint** returning JSON with `status`, `uptime`, and `version`.
+- **Central `Version` constant** in `internal/config` used by the CLI and health endpoint.
+- **Production deployment guide** `docs/deployment.md` with Caddy, nginx, systemd, and Docker examples.
+- **Homebrew formula** `scripts/homebrew/sin-websearch.rb` plus `update_formula.sh` and `.github/workflows/homebrew.yml` for automated formula updates on release.
+- **Cross-platform CI matrix** in `.github/workflows/ci.yml` for `ubuntu-latest`, `macos-latest`, and `windows-latest`.
+- **install.sh CI test** running on Ubuntu and macOS to verify the installer works end-to-end.
+
+### Fixed
+
+- **Flaky `TestDistributeFocusCustom`** in `internal/mission` by sorting distribution keys for deterministic output regardless of map iteration order.
+
+### Changed
+
+- `internal/server/http.go` now exposes a `Handler()` method and wires metrics/health/logging into the mux.
+- `internal/config/config.go` gained `Version` and `DisableRequestLogging` fields.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.3.0] - 2026-06-14
 
 ### Added
