@@ -60,6 +60,15 @@ go test ./...
 
 ## HTTP Endpoints
 
+All endpoints support optional bearer-token authentication when `token` is configured:
+
+```bash
+curl -X POST http://localhost:8787/api/v1/search \
+  -H 'Authorization: Bearer <token>' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"OpenSIN"}'
+```
+
 - `POST /api/v1/search` — search
 - `POST /api/v1/pulse` — pulse
 - `POST /api/v1/resolve` — resolve
@@ -69,6 +78,29 @@ go test ./...
 - `POST /api/v1/alchemist` — autonomous research loop
 - `POST /api/v1/alchemist/swarm` — multi-strategy swarm
 - `GET /health` — health check
+
+## Quality & Security
+
+- CEO-Audit: **A+ 100.0/100** (see `CEO_AUDIT_REPORT.md`)
+- `govulncheck` → 0 vulnerabilities
+- `gosec` → 0 findings
+- `golangci-lint` → 0 findings
+- CI runs on every push/PR: `ci.yml` + `ceo-audit.yml`
+- SBOMs: `sbom.spdx.json` (SPDX) and `bom.json` (CycloneDX)
+- MIT `SPDX-License-Identifier` header in every `.go` file
+
+## Development
+
+```bash
+make build    # build the binary
+make test     # run all tests
+make cover    # coverage report
+make vet      # go vet
+make lint     # golangci-lint
+make sec      # gosec + govulncheck
+make audit    # CEO-Audit
+make clean    # remove artifacts
+```
 
 ## Dependencies
 

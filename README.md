@@ -109,6 +109,27 @@ searxng_urls:
 - **HTTP REST API**: any app can call it
 - **Infisical secrets**: load keys from Infisical CLI
 
+## Quality & Security
+
+- **CEO-Audit**: A+ 100.0/100 — see `CEO_AUDIT_REPORT.md`
+- **Vulnerabilities**: `govulncheck` reports 0
+- **Static analysis**: `gosec` and `golangci-lint` report 0 findings
+- **CI/CD**: GitHub Actions run `ci.yml` (build/test/vet) and `ceo-audit.yml` (47-gate audit) on every push/PR
+- **SBOM**: `sbom.spdx.json` (SPDX) and `bom.json` (CycloneDX)
+- **Security policy**: see `SECURITY.md` and `.well-known/security.txt`
+
+## Development
+
+```bash
+git clone https://github.com/OpenSIN-Code/web_search_bundle.git
+cd web_search_bundle
+make test     # run tests
+make cover    # coverage report
+make lint     # golangci-lint
+make sec      # gosec + govulncheck
+make audit    # CEO-Audit
+```
+
 ## Documentation
 
 See `AGENTS.md` for agent-facing conventions and `docs/` for architecture docs.
