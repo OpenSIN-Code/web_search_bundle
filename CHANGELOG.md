@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-14
+
+### Added
+
+- **Per-IP rate limiting** for the HTTP API via token-bucket (`golang.org/x/time/rate`).
+  - Config keys: `rate_limit_rps` (default 10.0) and `rate_limit_burst` (default 20).
+  - Returns HTTP 429 with `Retry-After` header when exceeded.
+  - Supports `X-Forwarded-For` and `X-Real-Ip` for proxied deployments.
+- **Cross-platform release workflow** `.github/workflows/release.yml` — builds and publishes binaries for darwin/linux/windows (amd64/arm64) plus SHA256 checksums on every `v*` tag.
+- **`install.sh`** — one-command installer that downloads the latest release binary for the current OS/architecture and verifies the checksum.
+- **SIN-Code integration guide** in `README.md` with `sin-code skill install websearch` instructions.
+- `registry_test.go` and `ratelimit_test.go` with full coverage of the new behavior.
+
+### Changed
+
+- `internal/config/config.go` now parses `rate_limit_rps` and `rate_limit_burst`.
+- `internal/server/http.go` wraps all `/api/v1/*` handlers with the rate-limiting middleware.
+
+### Security
+
+- `govulncheck` reports **0 vulnerabilities**.
+- `gosec` reports **0 findings**.
+- `golangci-lint` reports **0 findings**.
+
 ## [0.2.9] - 2026-06-14
 
 ### Added

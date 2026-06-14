@@ -24,6 +24,8 @@ type Config struct {
 	Token             string            `mapstructure:"token"`
 	SearxNGURLs       []string          `mapstructure:"searxng_urls"`
 	Defaults          map[string]string `mapstructure:"defaults"`
+	RateLimitRPS      float64           `mapstructure:"rate_limit_rps"`
+	RateLimitBurst    int               `mapstructure:"rate_limit_burst"`
 }
 
 // Load reads the configuration from the default paths and environment variables.
@@ -46,6 +48,8 @@ func Load() (*Config, error) {
 	v.SetDefault("mcp_port", 8788)
 	v.SetDefault("searxng_urls", []string{})
 	v.SetDefault("defaults", map[string]string{})
+	v.SetDefault("rate_limit_rps", 10.0)
+	v.SetDefault("rate_limit_burst", 20)
 
 	v.SetEnvPrefix("SIN_WEBSEARCH")
 	v.AutomaticEnv()

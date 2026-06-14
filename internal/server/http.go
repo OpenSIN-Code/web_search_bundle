@@ -35,15 +35,18 @@ func NewHTTPServer(cfg *config.Config, orch *orchestrator.Orchestrator) *HTTPSer
 func (s *HTTPServer) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handleHealth)
-	mux.HandleFunc("/api/v1/search", s.authMiddleware(s.handleSearch))
-	mux.HandleFunc("/api/v1/search/stream", s.authMiddleware(s.handleSearchStream))
-	mux.HandleFunc("/api/v1/pulse", s.authMiddleware(s.handlePulse))
-	mux.HandleFunc("/api/v1/resolve", s.authMiddleware(s.handleResolve))
-	mux.HandleFunc("/api/v1/alchemist", s.authMiddleware(s.handleAlchemist))
-	mux.HandleFunc("/api/v1/alchemist/swarm", s.authMiddleware(s.handleAlchemistSwarm))
-	mux.HandleFunc("/api/v1/watch", s.authMiddleware(s.handleWatch))
-	mux.HandleFunc("/api/v1/vbrief", s.authMiddleware(s.handleVideoBrief))
-	mux.HandleFunc("/api/v1/vprompt", s.authMiddleware(s.handleVideoPrompt))
+
+	// Rate limit all mutating/expensive API endpoints per client IP.
+	rl := s.newRateLimiter()
+	mux.HandleFunc("/api/v1/search", rl(s.authMiddleware(s.handleSearch)))
+	mux.HandleFunc("/api/v1/search/stream", rl(s.authMiddleware(s.handleSearchStream)))
+	mux.HandleFunc("/api/v1/pulse", rl(s.authMiddleware(s.handlePulse)))
+	mux.HandleFunc("/api/v1/resolve", rl(s.authMiddleware(s.handleResolve)))
+	mux.HandleFunc("/api/v1/alchemist", rl(s.authMiddleware(s.handleAlchemist)))
+	mux.HandleFunc("/api/v1/alchemist/swarm", rl(s.authMiddleware(s.handleAlchemistSwarm)))
+	mux.HandleFunc("/api/v1/watch", rl(s.authMiddleware(s.handleWatch)))
+	mux.HandleFunc("/api/v1/vbrief", rl(s.authMiddleware(s.handleVideoBrief)))
+	mux.HandleFunc("/api/v1/vprompt", rl(s.authMiddleware(s.handleVideoPrompt)))
 
 	port := 8787
 	if s.cfg != nil && s.cfg.HTTPPort != 0 {
@@ -58,6 +61,22 @@ func (s *HTTPServer) Start() error {
 		IdleTimeout:  60 * time.Second,
 	}
 	return s.server.ListenAndServe()
+}
+
+// newRateLimiter creates the per-IP rate limiter based on config defaults.
+func (s *HTTPServer) newRateLimiter() func(http.HandlerFunc) http.HandlerFunc {
+	rps := 10.0
+	burst := 20
+	if s.cfg != nil {
+		if s.cfg.RateLimitRPS > 0 {
+			rps = s.cfg.RateLimitRPS
+		}
+		if s.cfg.RateLimitBurst > 0 {
+			burst = s.cfg.RateLimitBurst
+		}
+	}
+	store := newLimiterStore(rps, burst)
+	return store.rateLimitMiddleware
 }
 
 // Shutdown gracefully shuts down the server.

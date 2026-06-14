@@ -104,6 +104,8 @@ openai_api_key: "your-openai-key"
 http_port: 8787
 searxng_urls:
   - "http://localhost:8080"
+rate_limit_rps: 10.0      # per-IP requests per second
+rate_limit_burst: 20      # per-IP burst capacity
 ```
 
 ## Features

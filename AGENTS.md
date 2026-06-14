@@ -60,7 +60,7 @@ go test ./...
 
 ## HTTP Endpoints
 
-All endpoints support optional bearer-token authentication when `token` is configured:
+All endpoints support optional bearer-token authentication when `token` is configured, and per-IP token-bucket rate limiting (default 10 rps, burst 20) via `rate_limit_rps` / `rate_limit_burst`:
 
 ```bash
 curl -X POST http://localhost:8787/api/v1/search \
