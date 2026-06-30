@@ -18,6 +18,7 @@ func newServeCmd() *cobra.Command {
 				return err
 			}
 			server := mcp.NewServer(orch)
+			mcp.RegisterSearchStreamTool(server)
 			return server.Serve()
 		},
 	}

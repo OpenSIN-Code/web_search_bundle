@@ -32,6 +32,28 @@ type Config struct {
 	RateLimitRPS          float64           `mapstructure:"rate_limit_rps"`
 	RateLimitBurst        int               `mapstructure:"rate_limit_burst"`
 	DisableRequestLogging bool              `mapstructure:"disable_request_logging"`
+
+	// Tavily configuration
+	TavilyAPIKey           string  `mapstructure:"tavily_api_key"`
+	TavilyDefaultDepth     string  `mapstructure:"tavily_default_depth"`  // default: "basic"
+	TavilyIncludeAnswer    bool    `mapstructure:"tavily_include_answer"` // default: true
+
+	// Semantic caching
+	SemanticCacheEnabled   bool    `mapstructure:"semantic_cache_enabled"`   // default: true
+	SemanticCacheThreshold float64 `mapstructure:"semantic_cache_threshold"` // default: 0.85
+	NIMAPIKey              string  `mapstructure:"nim_api_key"`              // for embeddings
+
+	// Cost-aware routing
+	CostAwareRouting bool `mapstructure:"cost_aware_routing"` // default: true
+
+	// DuckDuckGo (free, always available)
+	DuckDuckGoEnabled bool `mapstructure:"duckduckgo_enabled"` // default: true
+
+	// MCP tool annotations
+	MCPToolAnnotations bool `mapstructure:"mcp_tool_annotations"` // default: true
+
+	// Streaming
+	MCPStreamingEnabled bool `mapstructure:"mcp_streaming_enabled"` // default: true
 }
 
 // Load reads the configuration from the default paths and environment variables.
@@ -57,6 +79,16 @@ func Load() (*Config, error) {
 	v.SetDefault("rate_limit_rps", 10.0)
 	v.SetDefault("rate_limit_burst", 20)
 	v.SetDefault("disable_request_logging", false)
+
+	// New optimization feature defaults
+	v.SetDefault("tavily_default_depth", "basic")
+	v.SetDefault("tavily_include_answer", true)
+	v.SetDefault("semantic_cache_enabled", true)
+	v.SetDefault("semantic_cache_threshold", 0.85)
+	v.SetDefault("cost_aware_routing", true)
+	v.SetDefault("duckduckgo_enabled", true)
+	v.SetDefault("mcp_tool_annotations", true)
+	v.SetDefault("mcp_streaming_enabled", true)
 
 	v.SetEnvPrefix("SIN_WEBSEARCH")
 	v.AutomaticEnv()
@@ -89,6 +121,12 @@ func Load() (*Config, error) {
 	}
 	if cfg.Token == "" {
 		cfg.Token = os.Getenv("SIN_WEBSEARCH_TOKEN")
+	}
+	if cfg.TavilyAPIKey == "" {
+		cfg.TavilyAPIKey = os.Getenv("TAVILY_API_KEY")
+	}
+	if cfg.NIMAPIKey == "" {
+		cfg.NIMAPIKey = os.Getenv("NIM_API_KEY")
 	}
 
 	return &cfg, nil

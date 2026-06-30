@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-06-30
+
+### Added
+
+- **MCP Tool Annotations** — all 7 MCP tools now declare `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` per MCP spec 2025-11-25.
+- **MCP outputSchema** — structured output schemas for all tools, enabling client-side validation.
+- **Tavily search engine** with 4-level depth tiering (`ultra-fast`/`fast`/`basic`/`advanced`) and `include_answer` support.
+- **Semantic caching** — embedding-based cache hit detection (>0.85 cosine similarity) using NIM or TF-IDF fallback.
+- **Cost-aware provider routing** — query classification routes to cheapest capable provider.
+- **DuckDuckGo engine** — free keyless web search, no API key required.
+- **Streaming MCP search** — NDJSON incremental results as each source completes.
+- **New config keys**: `tavily_*`, `semantic_cache_*`, `nim_api_key`, `cost_aware_routing`, `duckduckgo_enabled`, `mcp_*`.
+
+### Changed
+
+- Config struct expanded with 10+ new fields for feature toggles.
+- `config.example.yaml` updated with new keys and comments.
+
 ## [0.4.2] - 2026-06-14
 
 ### Fixed

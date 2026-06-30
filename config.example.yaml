@@ -1,6 +1,7 @@
 # sin-websearch example configuration
 # Place at ~/.config/sin-websearch/sin-websearch.yaml
 
+# ── Search provider API keys ──────────────────────────────────────────────
 serpapi_keys:
   - "${SERPAPI_KEY_1}"
   - "${SERPAPI_KEY_2}"
@@ -10,8 +11,47 @@ scrapecreators_api_key: "${SCRAPECREATORS_API_KEY}"
 groq_api_key: "${GROQ_API_KEY}"
 openai_api_key: "${OPENAI_API_KEY}"
 
+# ── Server / infrastructure ───────────────────────────────────────────────
 cache_path: "~/.local/share/sin-websearch/sin-websearch.db"
 http_port: 8787
 mcp_port: 8788
 searxng_urls:
   - "http://localhost:8080"
+
+# ── Rate limiting ─────────────────────────────────────────────────────────
+# rate_limit_rps: 10.0
+# rate_limit_burst: 20
+# disable_request_logging: false
+
+# ── Tavily (AI search API) ────────────────────────────────────────────────
+# Tavily provides AI-augmented web search. Get a key at https://tavily.com
+# Can also be set via the TAVILY_API_KEY env var.
+# tavily_api_key: "${TAVILY_API_KEY}"
+# tavily_default_depth: "basic"   # "basic" or "advanced"
+# tavily_include_answer: true     # include Tavily's AI-generated answer in results
+
+# ── Semantic caching (NVIDIA NIM embeddings) ─────────────────────────────
+# When enabled, similar queries return cached results without hitting the
+# search API. Requires nim_api_key for embedding generation.
+# Can also be set via the NIM_API_KEY env var.
+# semantic_cache_enabled: true
+# semantic_cache_threshold: 0.85  # cosine similarity threshold (0.0–1.0)
+# nim_api_key: "${NIM_API_KEY}"
+
+# ── Cost-aware routing ────────────────────────────────────────────────────
+# Routes simple queries to free providers (DuckDuckGo) and reserves paid
+# APIs for complex queries, reducing cost.
+# cost_aware_routing: true
+
+# ── DuckDuckGo (free, always available) ───────────────────────────────────
+# DuckDuckGo requires no API key and is used as the free fallback provider.
+# duckduckgo_enabled: true
+
+# ── MCP tool annotations ──────────────────────────────────────────────────
+# Adds MCP-level annotations (read-only hints, hints about destructiveness)
+# to tool definitions for better client integration.
+# mcp_tool_annotations: true
+
+# ── MCP streaming ─────────────────────────────────────────────────────────
+# Enables streaming responses for MCP search tool calls.
+# mcp_streaming_enabled: true

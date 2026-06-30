@@ -6,7 +6,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.25%2B-blue)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Unified Intelligence Gateway for OpenSIN — a single Go binary that orchestrates 20+ web sources (Reddit, Hacker News, Polymarket, GitHub, Brave, Bluesky, SearxNG, Perplexity, SerpAPI, YouTube) with entity resolution, humor/virality scoring, intelligent caching, multi-agent research missions, and video intelligence.
+Unified Intelligence Gateway for OpenSIN — a single Go binary that orchestrates 20+ web sources (Reddit, Hacker News, Polymarket, GitHub, Brave, Bluesky, SearxNG, Perplexity, SerpAPI, Tavily, DuckDuckGo, YouTube) with entity resolution, humor/virality scoring, intelligent caching, semantic caching, cost-aware provider routing, multi-agent research missions, and video intelligence.
 
 ## Installation
 
@@ -34,6 +34,12 @@ brew install --formula "$(brew --repo OpenSIN-Code/web_search_bundle)/scripts/ho
 ```bash
 # Search across all sources
 sin-websearch search "OpenClaw"
+
+# Streaming search (NDJSON incremental results per source)
+sin-websearch search "OpenClaw" --stream
+
+# Free keyless search via DuckDuckGo
+sin-websearch search "OpenClaw" --engine duckduckgo
 
 # Social pulse (engagement-focused)
 sin-websearch pulse "OpenClaw"
@@ -112,6 +118,10 @@ Create `~/.config/sin-websearch/sin-websearch.yaml`:
 serpapi_keys:
   - "your-serpapi-key"
 brave_api_key: "your-brave-key"
+tavily_api_key: "your-tavily-key"          # Tavily search engine
+tavily_default_depth: "basic"              # ultra-fast | fast | basic | advanced
+tavily_include_answer: false               # include Tavily-generated answer
+duckduckgo_enabled: true                   # free keyless search (no API key)
 openrouter_api_key: "your-openrouter-key"
 scrapecreators_api_key: "your-sc-key"
 groq_api_key: "your-groq-key"
@@ -121,11 +131,24 @@ searxng_urls:
   - "http://localhost:8080"
 rate_limit_rps: 10.0      # per-IP requests per second
 rate_limit_burst: 20      # per-IP burst capacity
+cost_aware_routing: false           # route to cheapest capable provider
+semantic_cache_enabled: false       # embedding-based cache hits
+semantic_cache_threshold: 0.85      # cosine similarity threshold
+semantic_cache_ttl: "24h"           # cache entry TTL
+nim_api_key: "your-nim-key"         # NVIDIA NIM embeddings (TF-IDF fallback if unset)
+mcp_annotations: true               # MCP spec 2025-11-25 tool annotations
+mcp_output_schema: true             # structured outputSchema for MCP tools
 ```
 
 ## Features
 
-- **Multi-source orchestration**: Reddit, HN, Polymarket, GitHub, Brave, Bluesky, SearxNG, Perplexity, SerpAPI, YouTube
+- **Multi-source orchestration**: Reddit, HN, Polymarket, GitHub, Brave, Bluesky, SearxNG, Perplexity, SerpAPI, Tavily, DuckDuckGo, YouTube
+- **Tavily search**: 4-level depth tiering (`ultra-fast`/`fast`/`basic`/`advanced`) with `include_answer` support
+- **DuckDuckGo search**: free keyless web search, no API key required
+- **Cost-aware routing**: query classification routes to cheapest capable provider
+- **Semantic caching**: embedding-based cache hit detection (>0.85 cosine similarity) with NIM or TF-IDF fallback
+- **Streaming MCP search**: NDJSON incremental results as each source completes
+- **MCP tool annotations & outputSchema**: full MCP spec 2025-11-25 compliance for client-side validation
 - **Entity resolution**: topic → X handles, GitHub repos, subreddits
 - **Humor & virality judge**: score content by engagement and wit
 - **Clustering**: merge duplicate stories across sources

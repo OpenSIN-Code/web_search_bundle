@@ -7,7 +7,7 @@
 ## Architecture
 
 - `cmd/sin-websearch/` — CLI commands (Cobra)
-- `internal/engines/` — source-specific search engines (Reddit, HN, GitHub, ...)
+- `internal/engines/` — source-specific search engines (Reddit, HN, GitHub, Tavily, DuckDuckGo, ...)
 - `internal/orchestrator/` — parallel fan-out orchestrator
 - `internal/resolver/` — entity resolution (topic → handles/repos/subreddits)
 - `internal/judge/` — virality and humor scoring
@@ -25,6 +25,8 @@
 - `internal/server/` — HTTP REST API
 - `internal/secrets/` — Infisical / env secret loading
 - `internal/config/` — Viper-based configuration
+- `internal/router/` — cost-aware provider routing (query classification → cheapest capable engine)
+- `internal/semantic/` — semantic caching (embedding-based similarity, NIM or TF-IDF fallback)
 - `internal/experiment/` — fixed-budget autonomous research loop runner
 - `internal/alchemist/` — Karpathy-style autonomous optimization daemon
 - `internal/alchemist/swarm.go` — multi-strategy parallel alchemist runs
@@ -51,12 +53,15 @@ go test ./...
 ## MCP Tools
 
 - `websearch_search` — multi-source search
+- `websearch_search_stream` — streaming search (NDJSON incremental results per source)
 - `websearch_pulse` — social pulse
 - `websearch_resolve` — entity resolution
 - `websearch_watch` — video analysis
 - `websearch_video_brief` — HTML briefing
 - `websearch_video_prompt` — Vision-LLM prompt
 - `websearch_alchemist` — autonomous research loop / swarm
+
+All MCP tools declare MCP spec 2025-11-25 annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) and `outputSchema` for client-side validation.
 
 ## HTTP Endpoints
 
@@ -120,3 +125,45 @@ The project was bootstrapped from the issues at https://github.com/OpenSIN-Code/
 - Issue #5: Swarm-Alchemist + Literature-Loader
 
 All code in this repo is built from those issues and comments.
+
+## Search Engines
+
+| Engine | API Key Required | Notes |
+|--------|-----------------|-------|
+| Reddit | No | Public JSON API |
+| Hacker News | No | Algolia HN API |
+| GitHub | Optional | Higher rate limit with token |
+| Brave | Yes | `brave_api_key` |
+| SerpAPI | Yes | `serpapi_keys` (rotation pool) |
+| SearxNG | No | Self-hosted instances via `searxng_urls` |
+| Perplexity | Yes | `openrouter_api_key` |
+| Bluesky | No | Public API |
+| Polymarket | No | Public API |
+| YouTube | No | yt-dlp sidecar |
+| **Tavily** | Yes | `tavily_api_key` — 4-level depth tiering (`ultra-fast`/`fast`/`basic`/`advanced`), `include_answer` support |
+| **DuckDuckGo** | No | Free keyless search (`duckduckgo_enabled`) |
+
+## Cost-Aware Routing & Semantic Caching
+
+- **Cost-aware routing** (`cost_aware_routing: true`): classifies queries and routes to the cheapest capable provider. Factual lookups prefer free engines (DuckDuckGo, HN); complex research queries may use Tavily/Perplexity.
+- **Semantic caching** (`semantic_cache_enabled: true`): uses embedding-based cosine similarity (>0.85 threshold) to detect cache hits for paraphrased queries. Falls back to TF-IDF when `nim_api_key` is not set.
+
+## Configuration Keys
+
+Standard keys (see `config.example.yaml`):
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `serpapi_keys` | `[]` | SerpAPI key rotation pool |
+| `brave_api_key` | `""` | Brave Search API key |
+| `tavily_api_key` | `""` | Tavily API key |
+| `tavily_default_depth` | `"basic"` | Default Tavily depth: `ultra-fast`/`fast`/`basic`/`advanced` |
+| `tavily_include_answer` | `false` | Include Tavily-generated answer in results |
+| `duckduckgo_enabled` | `true` | Enable free keyless DuckDuckGo engine |
+| `cost_aware_routing` | `false` | Enable cost-aware provider routing |
+| `semantic_cache_enabled` | `false` | Enable embedding-based semantic caching |
+| `semantic_cache_threshold` | `0.85` | Cosine similarity threshold for cache hits |
+| `semantic_cache_ttl` | `"24h"` | TTL for semantic cache entries |
+| `nim_api_key` | `""` | NVIDIA NIM API key for embeddings (TF-IDF fallback if unset) |
+| `mcp_annotations` | `true` | Emit MCP tool annotations per spec 2025-11-25 |
+| `mcp_output_schema` | `true` | Emit structured outputSchema for all MCP tools |

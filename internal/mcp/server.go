@@ -59,6 +59,20 @@ func (s *Server) setup() {
 			},
 			Required: []string{"query"},
 		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"results":  map[string]any{"type": "array"},
+				"clusters": map[string]any{"type": "array"},
+				"errors":   map[string]any{"type": "object"},
+			},
+		},
 	}
 	s.server.AddTool(searchTool, s.handleSearch)
 
@@ -70,6 +84,20 @@ func (s *Server) setup() {
 			Properties: map[string]interface{}{"topic": map[string]string{"type": "string", "description": "Topic to analyze"}},
 			Required:   []string{"topic"},
 		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"results":  map[string]any{"type": "array"},
+				"clusters": map[string]any{"type": "array"},
+				"errors":   map[string]any{"type": "object"},
+			},
+		},
 	}
 	s.server.AddTool(pulseTool, s.handlePulse)
 
@@ -80,6 +108,19 @@ func (s *Server) setup() {
 			Type:       "object",
 			Properties: map[string]interface{}{"name": map[string]string{"type": "string", "description": "Name or topic to resolve"}},
 			Required:   []string{"name"},
+		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"handles":   map[string]any{"type": "object"},
+				"confidence": map[string]any{"type": "number"},
+			},
 		},
 	}
 	s.server.AddTool(resolveTool, s.handleResolve)
@@ -93,6 +134,20 @@ func (s *Server) setup() {
 				"url": map[string]string{"type": "string", "description": "Video URL or local path"},
 			},
 			Required: []string{"url"},
+		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"frames":     map[string]any{"type": "array"},
+				"transcript": map[string]any{"type": "string"},
+				"duration":   map[string]any{"type": "string"},
+			},
 		},
 	}
 	s.server.AddTool(watchTool, s.handleWatch)
@@ -108,6 +163,19 @@ func (s *Server) setup() {
 			},
 			Required: []string{"url"},
 		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"html":   map[string]any{"type": "string"},
+				"preset": map[string]any{"type": "string"},
+			},
+		},
 	}
 	s.server.AddTool(videoBriefTool, s.handleVideoBrief)
 
@@ -122,6 +190,20 @@ func (s *Server) setup() {
 				"preset": map[string]string{"type": "string", "description": "general|bug|tutorial|hook|transcript|compare|summary"},
 			},
 			Required: []string{"url"},
+		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"prompt": map[string]any{"type": "string"},
+				"model":  map[string]any{"type": "string"},
+				"tokens": map[string]any{"type": "integer"},
+			},
 		},
 	}
 	s.server.AddTool(videoPromptTool, s.handleVideoPrompt)
@@ -146,6 +228,20 @@ func (s *Server) setup() {
 				"strategies":       map[string]string{"type": "string", "description": "Comma-separated strategy names for swarm mode. If empty, runs a single daemon."},
 			},
 			Required: []string{"run_cmd"},
+		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(false),
+			DestructiveHint: mcp.ToBoolPtr(true),
+			IdempotentHint:  mcp.ToBoolPtr(false),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"experiments":  map[string]any{"type": "integer"},
+				"best_metric":  map[string]any{"type": "string"},
+				"report":       map[string]any{"type": "string"},
+			},
 		},
 	}
 	s.server.AddTool(alchemistTool, s.handleAlchemist)
