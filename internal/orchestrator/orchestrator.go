@@ -20,21 +20,24 @@ import (
 
 // Orchestrator coordinates searches across multiple sources.
 type Orchestrator struct {
-	engines      []engines.Engine
-	resolver     *resolver.EntityResolver
-	judge        *judge.HumorJudge
-	clusterer    *clustering.Clusterer
-	cache        cache.CacheInterface
+	engines        []engines.Engine
+	resolver       *resolver.EntityResolver
+	judge          *judge.HumorJudge
+	clusterer      *clustering.Clusterer
+	cache          cache.CacheInterface
 	routingEnabled bool
+	stats          *StatsRegistry
+	singleflight   singleFlightGroup
 }
 
 // New creates an orchestrator with the given engines.
 func New(engines []engines.Engine) *Orchestrator {
 	return &Orchestrator{
-		engines:   engines,
-		resolver:  resolver.NewEntityResolver(),
-		judge:     judge.NewHumorJudge(),
-		clusterer: clustering.NewClusterer(),
+		engines:      engines,
+		resolver:     resolver.NewEntityResolver(),
+		judge:        judge.NewHumorJudge(),
+		clusterer:    clustering.NewClusterer(),
+		stats:        NewStatsRegistry(),
 	}
 }
 
@@ -61,6 +64,11 @@ func (o *Orchestrator) SetRoutingEnabled(enabled bool) {
 	o.routingEnabled = enabled
 }
 
+// Stats returns the stats registry for health reporting.
+func (o *Orchestrator) Stats() *StatsRegistry {
+	return o.stats
+}
+
 // SearchResult is the combined output of a fan-out search.
 type SearchResult struct {
 	Entity    *resolver.ResolvedEntity `json:"entity,omitempty"`
@@ -78,7 +86,14 @@ type StreamResult struct {
 }
 
 // Search runs a fan-out query across all configured engines.
+// Uses singleflight to coalesce identical concurrent queries into one engine call.
 func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult, error) {
+	return o.singleflight.Do(topic, func() (*SearchResult, error) {
+		return o.searchInternal(ctx, topic)
+	})
+}
+
+func (o *Orchestrator) searchInternal(ctx context.Context, topic string) (*SearchResult, error) {
 	entity, err := o.resolver.Resolve(ctx, topic)
 	if err != nil {
 		return nil, err
@@ -93,6 +108,7 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 	if o.cache != nil {
 		cached, ok, err := o.cache.Get(topic, o.engineNames())
 		if err == nil && ok {
+			o.stats.RecordCacheHit("orchestrator")
 			var result SearchResult
 			if err := json.Unmarshal(cached, &result); err == nil {
 				return &result, nil
@@ -102,12 +118,20 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 
 	// Cost-aware routing: when enabled, filter engines to the recommended subset.
 	selectedEngines := o.engines
+	maxParallel := len(selectedEngines)
 	if o.routingEnabled {
 		decision := Route(topic, o.engineNames())
 		selectedEngines = o.filterEngines(decision.Engines)
-		fmt.Fprintf(os.Stderr, "websearch: routing \"%s\" → %s (%d engines: %v)\n",
-			topic, decision.Type, len(selectedEngines), decision.Engines)
+		maxParallel = decision.MaxParallel
+		if maxParallel < 1 {
+			maxParallel = 1
+		}
+		fmt.Fprintf(os.Stderr, "websearch: routing \"%s\" → %s (%d engines, maxParallel=%d)\n",
+			topic, decision.Type, len(selectedEngines), maxParallel)
 	}
+
+	// Semaphore to enforce MaxParallel from router.
+	sema := make(chan struct{}, maxParallel)
 
 	var allItems []clustering.ClusterItem
 	var allResults []engines.Result
@@ -120,16 +144,32 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 		go func(e engines.Engine) {
 			defer wg.Done()
 
-			ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+			// Acquire semaphore slot.
+			select {
+			case sema <- struct{}{}:
+				defer func() { <-sema }()
+			case <-ctx.Done():
+				return
+			}
+
+			o.stats.RecordRequest(e.Name())
+			start := time.Now()
+
+			engCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 			defer cancel()
 
-			res, err := e.Search(ctx, queries[0], 10)
+			res, err := e.Search(engCtx, queries[0], 10)
+			latency := time.Since(start)
+
 			if err != nil {
+				o.stats.RecordFailure(e.Name())
 				mu.Lock()
 				errs[e.Name()] = err.Error()
 				mu.Unlock()
 				return
 			}
+
+			o.stats.RecordSuccess(e.Name(), latency)
 
 			mu.Lock()
 			for _, r := range res {
@@ -146,6 +186,9 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 		}(engine)
 	}
 	wg.Wait()
+
+	// Deduplicate results by URL, summing scores from multiple engines.
+	allResults = dedupResults(allResults)
 
 	clusters := o.clusterer.Cluster(allItems)
 
@@ -206,6 +249,38 @@ func (o *Orchestrator) filterEngines(names []string) []engines.Engine {
 	return filtered
 }
 
+// dedupResults removes duplicate results by URL, summing scores when the same
+// URL appears across multiple engines. Results without a URL are kept as-is.
+func dedupResults(results []engines.Result) []engines.Result {
+	if len(results) == 0 {
+		return results
+	}
+	seen := make(map[string]int, len(results)) // URL → index in output
+	var out []engines.Result
+
+	for _, r := range results {
+		if r.URL == "" {
+			out = append(out, r)
+			continue
+		}
+		if idx, ok := seen[r.URL]; ok {
+			// Merge: sum scores, keep the higher-engagement version.
+			out[idx].Score += r.Score
+			if r.Engagement > out[idx].Engagement {
+				out[idx].Engagement = r.Engagement
+			}
+			// Append source if different.
+			if r.Source != out[idx].Source {
+				out[idx].Source = out[idx].Source + "," + r.Source
+			}
+		} else {
+			seen[r.URL] = len(out)
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
 // Pulse runs a quick social-pulse search focused on engagement.
 func (o *Orchestrator) Pulse(ctx context.Context, topic string) (*SearchResult, error) {
 	res, err := o.Search(ctx, topic)
@@ -220,7 +295,23 @@ func (o *Orchestrator) Pulse(ctx context.Context, topic string) (*SearchResult, 
 }
 
 // SearchStream runs a fan-out search and streams results per engine as they arrive.
+// Results are cached after all engines complete, identical to Search().
 func (o *Orchestrator) SearchStream(ctx context.Context, topic string) (<-chan StreamResult, error) {
+	// Check cache first — if hit, emit from cache and return immediately.
+	if o.cache != nil {
+		cached, ok, err := o.cache.Get(topic, o.engineNames())
+		if err == nil && ok {
+			o.stats.RecordCacheHit("orchestrator")
+			var result SearchResult
+			if err := json.Unmarshal(cached, &result); err == nil {
+				out := make(chan StreamResult, 1)
+				out <- StreamResult{Source: "cache", Items: result.Results}
+				close(out)
+				return out, nil
+			}
+		}
+	}
+
 	entity, err := o.resolver.Resolve(ctx, topic)
 	if err != nil {
 		return nil, err
@@ -230,33 +321,84 @@ func (o *Orchestrator) SearchStream(ctx context.Context, topic string) (<-chan S
 		queries = []string{topic}
 	}
 
-	out := make(chan StreamResult, len(o.engines))
+	// Determine selected engines and maxParallel.
+	selectedEngines := o.engines
+	maxParallel := len(selectedEngines)
+	if o.routingEnabled {
+		decision := Route(topic, o.engineNames())
+		selectedEngines = o.filterEngines(decision.Engines)
+		maxParallel = decision.MaxParallel
+		if maxParallel < 1 {
+			maxParallel = 1
+		}
+	}
+
+	sema := make(chan struct{}, maxParallel)
+	out := make(chan StreamResult, len(selectedEngines))
+
+	var allResults []engines.Result
+	var mu sync.Mutex
 	var wg sync.WaitGroup
-	for _, engine := range o.engines {
+
+	for _, engine := range selectedEngines {
 		wg.Add(1)
 		go func(e engines.Engine) {
 			defer wg.Done()
+
+			select {
+			case sema <- struct{}{}:
+				defer func() { <-sema }()
+			case <-ctx.Done():
+				return
+			}
+
+			o.stats.RecordRequest(e.Name())
+			start := time.Now()
+
 			engCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 			defer cancel()
 
 			res, err := e.Search(engCtx, queries[0], 10)
+			latency := time.Since(start)
+
 			if err != nil {
+				o.stats.RecordFailure(e.Name())
 				select {
 				case out <- StreamResult{Source: e.Name(), Error: err.Error()}:
 				case <-ctx.Done():
 				}
 				return
 			}
+
+			o.stats.RecordSuccess(e.Name(), latency)
+
+			mu.Lock()
+			allResults = append(allResults, res...)
+			mu.Unlock()
+
 			select {
 			case out <- StreamResult{Source: e.Name(), Items: res}:
 			case <-ctx.Done():
 			}
 		}(engine)
 	}
+
 	go func() {
 		wg.Wait()
+		// Cache the combined results after all engines complete.
+		if o.cache != nil && len(allResults) > 0 {
+			deduped := dedupResults(allResults)
+			result := &SearchResult{
+				Entity:  entity,
+				Results: deduped,
+			}
+			if data, err := json.Marshal(result); err == nil {
+				_ = o.cache.Set(topic, o.engineNames(), data, 24*time.Hour)
+			}
+		}
 		close(out)
 	}()
+
 	return out, nil
 }
 

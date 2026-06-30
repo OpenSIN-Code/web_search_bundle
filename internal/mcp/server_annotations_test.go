@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Purpose: Verify MCP tool annotations and output schemas for all 7 tools.
+// Purpose: Verify MCP tool annotations and output schemas for all 8 tools.
 package mcp
 
 import (
@@ -33,8 +33,8 @@ func boolPtrVal(b *bool) bool {
 func TestToolAnnotations(t *testing.T) {
 	srv := NewServer(stubOrchestrator{})
 	tools := srv.server.ListTools()
-	if len(tools) != 7 {
-		t.Fatalf("expected 7 tools, got %d", len(tools))
+	if len(tools) != 8 {
+		t.Fatalf("expected 8 tools, got %d", len(tools))
 	}
 
 	readOnlyTools := []string{
@@ -44,6 +44,7 @@ func TestToolAnnotations(t *testing.T) {
 		"websearch_watch",
 		"websearch_video_brief",
 		"websearch_video_prompt",
+		"websearch_status",
 	}
 
 	for _, name := range readOnlyTools {

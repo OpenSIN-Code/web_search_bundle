@@ -29,6 +29,11 @@ type Orchestrator interface {
 	SearchStream(ctx context.Context, topic string) (<-chan orchestrator.StreamResult, error)
 }
 
+// StatsProvider returns engine health metrics (optional, may be nil).
+type StatsProvider interface {
+	Stats() *orchestrator.StatsRegistry
+}
+
 // Server wraps the MCP server and application services.
 type Server struct {
 	orchestrator Orchestrator
@@ -245,11 +250,47 @@ func (s *Server) setup() {
 		},
 	}
 	s.server.AddTool(alchemistTool, s.handleAlchemist)
+
+	// Engine health / metrics tool.
+	statusTool := mcp.Tool{
+		Name:        "websearch_status",
+		Description: "Engine health metrics — per-engine request counts, success rate, avg latency, cache hits",
+		InputSchema: mcp.ToolInputSchema{
+			Type: "object",
+			Properties: map[string]any{},
+		},
+		Annotations: mcp.ToolAnnotation{
+			ReadOnlyHint:    mcp.ToBoolPtr(true),
+			DestructiveHint: mcp.ToBoolPtr(false),
+			IdempotentHint:  mcp.ToBoolPtr(true),
+			OpenWorldHint:   mcp.ToBoolPtr(true),
+		},
+		OutputSchema: mcp.ToolOutputSchema{
+			Type: "object",
+			Properties: map[string]any{
+				"engines": map[string]any{"type": "array"},
+			},
+		},
+	}
+	s.server.AddTool(statusTool, s.handleStatus)
 }
 
 // Serve starts the stdio MCP server.
 func (s *Server) Serve() error {
 	return mcpserver.ServeStdio(s.server)
+}
+
+func (s *Server) handleStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	sp, ok := s.orchestrator.(StatsProvider)
+	if !ok || sp == nil {
+		return mcp.NewToolResultText(`{"engines":[],"note":"stats not available"}`), nil
+	}
+	snap := sp.Stats().Snapshot()
+	data, err := json.MarshalIndent(map[string]any{"engines": snap}, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return mcp.NewToolResultText(string(data)), nil
 }
 
 func argString(req mcp.CallToolRequest, key string) string {

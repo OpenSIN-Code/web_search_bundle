@@ -19,6 +19,16 @@ type TavilyEngine struct {
 	client       *http.Client
 	apiKey       string
 	defaultDepth string
+	retry        RetryConfig
+	lastResults  struct {
+		Answer  string `json:"answer"`
+		Results []struct {
+			Title   string  `json:"title"`
+			URL     string  `json:"url"`
+			Content string  `json:"content"`
+			Score   float64 `json:"score"`
+		} `json:"results"`
+	}
 }
 
 // NewTavilyEngine creates a Tavily engine with the given API key.
@@ -26,6 +36,7 @@ func NewTavilyEngine(apiKey string) *TavilyEngine {
 	return &TavilyEngine{
 		client: &http.Client{Timeout: 15 * time.Second},
 		apiKey: apiKey,
+		retry:  DefaultRetryConfig(),
 	}
 }
 
@@ -66,7 +77,7 @@ func classifyDepth(query string) string {
 	return "basic"
 }
 
-// Search queries the Tavily Search API.
+// Search queries the Tavily Search API with retry on transient failures.
 func (e *TavilyEngine) Search(ctx context.Context, query string, limit int) ([]Result, error) {
 	if e.apiKey == "" {
 		return nil, fmt.Errorf("tavily: api key not configured")
@@ -92,53 +103,63 @@ func (e *TavilyEngine) Search(ctx context.Context, query string, limit int) ([]R
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.tavily.com/search", bytes.NewReader(body))
+	_, err = RetryDo(ctx, e.retry, func() (int, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.tavily.com/search", bytes.NewReader(body))
+		if err != nil {
+			return 0, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+e.apiKey)
+
+		resp, err := e.client.Do(req)
+		if err != nil {
+			return 0, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
+			b, _ := io.ReadAll(resp.Body)
+			return resp.StatusCode, fmt.Errorf("tavily: %s - %s", resp.Status, string(b))
+		}
+		if resp.StatusCode != 200 {
+			b, _ := io.ReadAll(resp.Body)
+			return resp.StatusCode, fmt.Errorf("tavily: %s - %s", resp.Status, string(b))
+		}
+
+		var response struct {
+			Answer  string `json:"answer"`
+			Results []struct {
+				Title   string  `json:"title"`
+				URL     string  `json:"url"`
+				Content string  `json:"content"`
+				Score   float64 `json:"score"`
+			} `json:"results"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			return resp.StatusCode, err
+		}
+
+		e.lastResults = response
+		return resp.StatusCode, nil
+	})
+
 	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+e.apiKey)
-
-	resp, err := e.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 429 {
-		return nil, fmt.Errorf("tavily: rate limited")
-	}
-	if resp.StatusCode != 200 {
-		b, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("tavily: %s - %s", resp.Status, string(b))
-	}
-
-	var response struct {
-		Answer  string `json:"answer"`
-		Results []struct {
-			Title   string  `json:"title"`
-			URL     string  `json:"url"`
-			Content string  `json:"content"`
-			Score   float64 `json:"score"`
-		} `json:"results"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
 
 	var results []Result
 
-	if response.Answer != "" {
+	if e.lastResults.Answer != "" {
 		results = append(results, Result{
 			Title:   "Tavily Answer",
 			URL:     "https://tavily.com",
-			Snippet: response.Answer,
+			Snippet: e.lastResults.Answer,
 			Source:  "tavily_answer",
 		})
 	}
 
-	for _, r := range response.Results {
+	for _, r := range e.lastResults.Results {
 		results = append(results, Result{
 			Title:   r.Title,
 			URL:     r.URL,
