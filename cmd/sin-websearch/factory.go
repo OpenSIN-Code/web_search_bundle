@@ -79,8 +79,18 @@ func buildOrchestrator() (*orchestrator.Orchestrator, error) {
 			sc.SetThreshold(cfg.SemanticCacheThreshold)
 		}
 		fmt.Fprintf(os.Stderr, "websearch: semantic cache enabled (threshold=%.2f)\n", cfg.SemanticCacheThreshold)
-		return orchestrator.NewWithCache(engList, c), nil
+		orch := orchestrator.NewWithCacheInterface(engList, sc)
+		if cfg.CostAwareRouting {
+			orch.SetRoutingEnabled(true)
+			fmt.Fprintf(os.Stderr, "websearch: cost-aware routing enabled\n")
+		}
+		return orch, nil
 	}
 
-	return orchestrator.NewWithCache(engList, c), nil
+	orch := orchestrator.NewWithCache(engList, c)
+	if cfg.CostAwareRouting {
+		orch.SetRoutingEnabled(true)
+		fmt.Fprintf(os.Stderr, "websearch: cost-aware routing enabled\n")
+	}
+	return orch, nil
 }

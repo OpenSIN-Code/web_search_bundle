@@ -83,7 +83,7 @@ func TestNewWithCache(t *testing.T) {
 	}
 	defer c.Close()
 	o := NewWithCache(nil, c)
-	if o.cache != c {
+	if o.cache == nil {
 		t.Error("NewWithCache did not assign cache")
 	}
 }

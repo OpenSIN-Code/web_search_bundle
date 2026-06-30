@@ -23,6 +23,14 @@ type Embedder interface {
 	Embed(query string) ([]float32, error)
 }
 
+// CacheInterface is the contract both Cache and SemanticCache implement.
+// The orchestrator uses this interface so it can work with either the raw
+// key-based cache or the semantic (embedding-based) wrapper.
+type CacheInterface interface {
+	Get(query string, sources []string) ([]byte, bool, error)
+	Set(query string, sources []string, payload interface{}, ttl time.Duration) error
+}
+
 // SemanticCache wraps *Cache with an embedding-based similarity layer.
 type SemanticCache struct {
 	inner     *Cache
@@ -45,6 +53,7 @@ func NewSemanticCache(inner *Cache, embedder Embedder) *SemanticCache {
 }
 
 // Set stores a result in the cache together with its embedding.
+// Implements CacheInterface — takes query + sources (not pre-hashed key).
 func (sc *SemanticCache) Set(query string, sources []string, payload interface{}, ttl time.Duration) error {
 	key := HashKey(query, sources)
 	if err := sc.inner.Set(key, sources, payload, ttl); err != nil {
@@ -64,13 +73,21 @@ func (sc *SemanticCache) Set(query string, sources []string, payload interface{}
 
 // Get first tries an exact key match, then iterates stored embeddings for a
 // cosine similarity above the threshold.  Returns the cached payload on hit.
-func (sc *SemanticCache) Get(query string) ([]byte, bool, error) {
+// Implements CacheInterface — takes query + sources (not pre-hashed key).
+func (sc *SemanticCache) Get(query string, sources []string) ([]byte, bool, error) {
 	// Fast path: exact query match.
 	sc.mu.RLock()
 	key, exact := sc.keys[query]
 	sc.mu.RUnlock()
 	if exact {
 		return sc.inner.Get(key)
+	}
+
+	// Try exact hash-key match (in case the query was stored under a different
+	// call path but with the same query string).
+	hashKey := HashKey(query, sources)
+	if data, ok, err := sc.inner.Get(hashKey); ok && err == nil {
+		return data, true, nil
 	}
 
 	// Semantic path: compute embedding and search.
@@ -106,6 +123,30 @@ func (sc *SemanticCache) SetThreshold(t float64) {
 	sc.mu.Lock()
 	sc.threshold = t
 	sc.mu.Unlock()
+}
+
+// CacheAdapter wraps *Cache to satisfy CacheInterface.
+// The raw Cache uses pre-hashed keys; the adapter handles hashing so the
+// orchestrator can call Get/Set with query + sources uniformly.
+type CacheAdapter struct {
+	inner *Cache
+}
+
+// NewCacheAdapter wraps a raw Cache as a CacheInterface.
+func NewCacheAdapter(c *Cache) CacheInterface {
+	return &CacheAdapter{inner: c}
+}
+
+// Set implements CacheInterface.
+func (a *CacheAdapter) Set(query string, sources []string, payload interface{}, ttl time.Duration) error {
+	key := HashKey(query, sources)
+	return a.inner.Set(key, sources, payload, ttl)
+}
+
+// Get implements CacheInterface.
+func (a *CacheAdapter) Get(query string, sources []string) ([]byte, bool, error) {
+	key := HashKey(query, sources)
+	return a.inner.Get(key)
 }
 
 // ---------------------------------------------------------------------------

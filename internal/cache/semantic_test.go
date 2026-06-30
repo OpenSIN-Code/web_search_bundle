@@ -100,7 +100,7 @@ func TestSemanticCacheExactHit(t *testing.T) {
 	if err := sc.Set("golang concurrency", []string{"reddit"}, "result", time.Hour); err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	data, found, err := sc.Get("golang concurrency")
+	data, found, err := sc.Get("golang concurrency", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestSemanticCacheSemanticHit(t *testing.T) {
 		t.Fatalf("Set: %v", err)
 	}
 	// Query with overlapping words — TF-IDF bag-of-words should match.
-	data, found, err := sc.Get("test go code how to")
+	data, found, err := sc.Get("test go code how to", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
@@ -136,7 +136,7 @@ func TestSemanticCacheMiss(t *testing.T) {
 	if err := sc.Set("golang concurrency", []string{"reddit"}, "r1", time.Hour); err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	_, found, err := sc.Get("completely different topic xyz")
+	_, found, err := sc.Get("completely different topic xyz", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestSemanticCacheNilEmbedder(t *testing.T) {
 		t.Fatalf("Set: %v", err)
 	}
 	// Exact match still works because keys map is populated.
-	data, found, err := sc.Get("query")
+	data, found, err := sc.Get("query", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestSemanticCacheNilEmbedder(t *testing.T) {
 		t.Errorf("unexpected payload: %s", data)
 	}
 	// No semantic match possible.
-	_, found, err = sc.Get("totally different query")
+	_, found, err = sc.Get("totally different query", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestSemanticCacheEmbedderError(t *testing.T) {
 		t.Fatalf("Set: %v", err)
 	}
 	// Exact match works (key stored even though embedding failed).
-	data, found, err := sc.Get("query a")
+	data, found, err := sc.Get("query a", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get exact: %v", err)
 	}
@@ -198,7 +198,7 @@ func TestSemanticCacheEmbedderError(t *testing.T) {
 		t.Errorf("unexpected payload: %s", data)
 	}
 	// Semantic lookup degrades gracefully — no hit, no error.
-	_, found, err = sc.Get("query a variant")
+	_, found, err = sc.Get("query a variant", []string{"test"})
 	if err != nil {
 		t.Fatalf("Get semantic: %v", err)
 	}

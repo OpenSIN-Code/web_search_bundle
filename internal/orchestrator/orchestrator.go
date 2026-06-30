@@ -20,11 +20,12 @@ import (
 
 // Orchestrator coordinates searches across multiple sources.
 type Orchestrator struct {
-	engines   []engines.Engine
-	resolver  *resolver.EntityResolver
-	judge     *judge.HumorJudge
-	clusterer *clustering.Clusterer
-	cache     *cache.Cache
+	engines      []engines.Engine
+	resolver     *resolver.EntityResolver
+	judge        *judge.HumorJudge
+	clusterer    *clustering.Clusterer
+	cache        cache.CacheInterface
+	routingEnabled bool
 }
 
 // New creates an orchestrator with the given engines.
@@ -40,8 +41,24 @@ func New(engines []engines.Engine) *Orchestrator {
 // NewWithCache creates an orchestrator with a persistent cache.
 func NewWithCache(engines []engines.Engine, c *cache.Cache) *Orchestrator {
 	o := New(engines)
+	o.cache = cache.NewCacheAdapter(c)
+	return o
+}
+
+// NewWithCacheInterface creates an orchestrator with any CacheInterface
+// (e.g. SemanticCache). This is the preferred constructor when semantic
+// caching is enabled.
+func NewWithCacheInterface(engines []engines.Engine, c cache.CacheInterface) *Orchestrator {
+	o := New(engines)
 	o.cache = c
 	return o
+}
+
+// SetRoutingEnabled toggles cost-aware provider routing. When true, Search
+// classifies the query and only fans out to the recommended engines instead
+// of all engines. When false (default), all engines are queried in parallel.
+func (o *Orchestrator) SetRoutingEnabled(enabled bool) {
+	o.routingEnabled = enabled
 }
 
 // SearchResult is the combined output of a fan-out search.
@@ -74,8 +91,7 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 
 	// Cache lookup
 	if o.cache != nil {
-		key := cache.HashKey(topic, o.engineNames())
-		cached, ok, err := o.cache.Get(key)
+		cached, ok, err := o.cache.Get(topic, o.engineNames())
 		if err == nil && ok {
 			var result SearchResult
 			if err := json.Unmarshal(cached, &result); err == nil {
@@ -84,13 +100,22 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 		}
 	}
 
+	// Cost-aware routing: when enabled, filter engines to the recommended subset.
+	selectedEngines := o.engines
+	if o.routingEnabled {
+		decision := Route(topic, o.engineNames())
+		selectedEngines = o.filterEngines(decision.Engines)
+		fmt.Fprintf(os.Stderr, "websearch: routing \"%s\" → %s (%d engines: %v)\n",
+			topic, decision.Type, len(selectedEngines), decision.Engines)
+	}
+
 	var allItems []clustering.ClusterItem
 	var allResults []engines.Result
 	var mu sync.Mutex
 	errs := make(map[string]string)
 
 	var wg sync.WaitGroup
-	for _, engine := range o.engines {
+	for _, engine := range selectedEngines {
 		wg.Add(1)
 		go func(e engines.Engine) {
 			defer wg.Done()
@@ -146,10 +171,9 @@ func (o *Orchestrator) Search(ctx context.Context, topic string) (*SearchResult,
 
 	// Cache store
 	if o.cache != nil {
-		key := cache.HashKey(topic, o.engineNames())
 		data, err := json.Marshal(result)
 		if err == nil {
-			_ = o.cache.Set(key, o.engineNames(), data, 24*time.Hour)
+			_ = o.cache.Set(topic, o.engineNames(), data, 24*time.Hour)
 		}
 	}
 
@@ -162,6 +186,24 @@ func (o *Orchestrator) engineNames() []string {
 		names = append(names, e.Name())
 	}
 	return names
+}
+
+// filterEngines returns only the engines whose names appear in the filter list.
+func (o *Orchestrator) filterEngines(names []string) []engines.Engine {
+	if len(names) == 0 {
+		return o.engines
+	}
+	wanted := make(map[string]bool, len(names))
+	for _, n := range names {
+		wanted[n] = true
+	}
+	var filtered []engines.Engine
+	for _, e := range o.engines {
+		if wanted[e.Name()] {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
 }
 
 // Pulse runs a quick social-pulse search focused on engagement.
