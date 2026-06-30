@@ -66,6 +66,10 @@ func buildOrchestrator() (*orchestrator.Orchestrator, error) {
 		fmt.Fprintf(os.Stderr, "websearch: duckduckgo engine enabled (free)\n")
 	}
 
+	// context7 engine (library docs) — always enabled, no API key needed.
+	engList = append(engList, engines.NewContext7Engine())
+	fmt.Fprintf(os.Stderr, "websearch: context7 engine enabled (library docs)\n")
+
 	c, err := cache.New(cfg.CachePath)
 	if err != nil {
 		return orchestrator.New(engList), nil

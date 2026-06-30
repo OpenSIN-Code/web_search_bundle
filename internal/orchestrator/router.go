@@ -18,6 +18,7 @@ const (
 	QueryTypeTech
 	QueryTypeResearch
 	QueryTypeVideo
+	QueryTypeDocs
 )
 
 // String returns the human-readable name of the query type.
@@ -33,6 +34,8 @@ func (q QueryType) String() string {
 		return "research"
 	case QueryTypeVideo:
 		return "video"
+	case QueryTypeDocs:
+		return "docs"
 	default:
 		return "simple"
 	}
@@ -63,6 +66,7 @@ var keywordSets = []struct {
 	{QueryTypeTech, []string{"github", "code", "programming", "api", "tech"}},
 	{QueryTypeResearch, []string{"research", "compare", "analysis", "deep", "study"}},
 	{QueryTypeVideo, []string{"video", "youtube", "watch"}},
+	{QueryTypeDocs, []string{"docs", "documentation", "api reference", "how to use", "library", "framework", "sdk", "react", "nextjs", "next.js", "vue", "svelte", "prisma", "supabase", "tailwind", "django", "fastapi", "express", "nestjs", "typescript", "install", "import", "npm install", "pip install", "cargo add", "go get"}},
 }
 
 // ClassifyQuery inspects the query string and returns its QueryType.
@@ -106,7 +110,7 @@ var routingTable = map[QueryType]struct {
 		MaxParallel: 2,
 	},
 	QueryTypeResearch: {
-		Engines:     []string{"duckduckgo", "tavily", "brave", "reddit", "hackernews", "github", "youtube"},
+		Engines:     []string{"duckduckgo", "tavily", "brave", "reddit", "hackernews", "github", "youtube", "context7"},
 		Reason:      "research query: broad fan-out across all engines",
 		MaxParallel: 5,
 	},
@@ -114,6 +118,11 @@ var routingTable = map[QueryType]struct {
 		Engines:     []string{"youtube"},
 		Reason:      "video query: YouTube only",
 		MaxParallel: 1,
+	},
+	QueryTypeDocs: {
+		Engines:     []string{"context7", "duckduckgo"},
+		Reason:      "docs query: context7 for official docs + DuckDuckGo fallback",
+		MaxParallel: 2,
 	},
 }
 
@@ -123,6 +132,7 @@ var costTable = map[string]struct {
 	CreditsPerCall int
 }{
 	"duckduckgo":  {true, 0},
+	"context7":    {true, 0},
 	"reddit":      {true, 0},
 	"hackernews":  {true, 0},
 	"github":      {true, 0},
